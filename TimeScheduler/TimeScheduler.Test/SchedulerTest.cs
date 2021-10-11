@@ -26,6 +26,14 @@ namespace TimeScheduler.Test
         }
 
         [TestMethod]
+        public void validate_enabled_bad_format()
+        {
+            this.scheduler = new Scheduler();
+            this.scheduler.Enabled = "bad_format";
+            Assert.ThrowsException<TimeSchedulerException>(() => this.scheduler.GetNextExecution());
+        }
+
+        [TestMethod]
         public void validate_enabled_false()
         {
             this.scheduler = new Scheduler();
@@ -158,7 +166,7 @@ namespace TimeScheduler.Test
             this.scheduler.Enabled = "true";
             this.scheduler.ExecutionType = "Once";
             this.scheduler.CurrentDate = "01/01/2000 00:00:00";
-            this.scheduler.CurrentDate = "01/01/0000 00:00:00";
+            this.scheduler.ExecutionDate = "01/01/0000 00:00:00";
             Assert.ThrowsException<TimeSchedulerException>(() => this.scheduler.GetNextExecution());
         }
 
@@ -362,6 +370,19 @@ namespace TimeScheduler.Test
                 "every day", DateTime.Parse(this.scheduler.CurrentDate).AddDays(1).ToShortDateString(),
                DateTime.Parse(this.scheduler.CurrentDate).ToShortTimeString(),
                 this.scheduler.StartDate, this.scheduler.EndDate));
+        }
+
+        [TestMethod]
+        public void validate_next_execution_date_max_date()
+        {
+            this.scheduler = new Scheduler();
+            this.scheduler.Enabled = "true";
+            this.scheduler.ExecutionType = "Recurring";
+            this.scheduler.CurrentDate = "01/01/2000 00:00:00";
+            this.scheduler.NumDays = "99999999";
+            this.scheduler.StartDate = "01/01/2000 00:00:00";
+            this.scheduler.EndDate = "01/01/2000 00:00:00";
+            Assert.ThrowsException<TimeSchedulerException>(() => this.scheduler.GetNextExecution());
         }
     }
 }
