@@ -7,11 +7,11 @@ namespace TimeScheduler
     {
         string[] execution;
 
-        public Scheduler() 
+        public Scheduler()
         {
             this.execution = new string[2];
         }
-        
+
         public string CurrentDate { get; set; }
         public string ExecutionDate { get; set; }
         public string StartDate { get; set; }
@@ -44,11 +44,32 @@ namespace TimeScheduler
         {
             this.ValidateEnabled();
             this.ValidateExecutionType();
-            this.ValidateCurrentDate();
+            this.ValidateCurrentDate();            
+            if (this.ExecutionType == "Once")
+            {
+                this.ValidateTimeExecution();
+            }
+            else
+            {
+                this.ValidateNumDays();
+                this.ValidateSum();
+            }
             this.ValidateStartDate();
             this.ValidateEndDate();
         }
-        
+
+        private void ValidateSum()
+        {
+            try
+            {
+                DateTime.Parse(this.CurrentDate).AddDays(Double.Parse(this.NumDays));
+            }
+            catch(Exception e)
+            {
+                throw new TimeSchedulerException();
+            }
+        }
+
         private void ValidateStartDate()
         {
             this.ValidateDates(this.StartDate);
@@ -84,29 +105,21 @@ namespace TimeScheduler
             {
                 throw new TimeSchedulerException(Global.DateTimeNotCompleted);
             }
-            if (this.ExecutionType == "Once")
-            {
-                this.SchedulerStrategy = new OnceStrategy();
-                this.ValidateTimeExecution();
-            }
-            else
-            {
-                this.SchedulerStrategy = new RecurringStrategy();
-                this.ValidateNumDays();
-            }
+            this.SchedulerStrategy = this.ExecutionType == "Once" ? new OnceStrategy()
+                : new RecurringStrategy();
         }
 
         private void ValidateNumDays()
         {
-            if(Double.TryParse(this.NumDays, out _) == false)
+            if (this.NumDays == null)
             {
                 throw new TimeSchedulerException();
             }
-            if(this.NumDays.ToString() == null)
+            if (string.IsNullOrWhiteSpace(this.NumDays))
             {
                 throw new TimeSchedulerException();
             }
-            if (string.IsNullOrWhiteSpace(this.NumDays.ToString()))
+            if (Double.TryParse(this.NumDays, out _) == false)
             {
                 throw new TimeSchedulerException();
             }
@@ -130,18 +143,11 @@ namespace TimeScheduler
             {
                 throw new TimeSchedulerException();
             }
-            if (DateTime.Parse(DateToValidate) >= DateTime.MaxValue)
-            {
-                throw new TimeSchedulerException();
-            }
-            if (DateTime.Parse(DateToValidate) <= DateTime.MinValue)
-            {
-                throw new TimeSchedulerException();
-            }
+
         }
         private void ValidateEnabled()
         {
-            if(this.Enabled == null)
+            if (this.Enabled == null)
             {
                 throw new TimeSchedulerException();
             }
@@ -149,7 +155,7 @@ namespace TimeScheduler
             {
                 throw new TimeSchedulerException();
             }
-            if(this.Enabled.Equals("false") == false &&
+            if (this.Enabled.Equals("false") == false &&
                 this.Enabled.Equals("true") == false)
             {
                 throw new TimeSchedulerException();
