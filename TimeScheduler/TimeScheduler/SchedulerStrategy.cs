@@ -4,8 +4,8 @@ namespace TimeScheduler
 {
     public abstract class SchedulerStrategy
     {
-        public abstract string CalculateNextExecutionDate(string numDays, string currentDate, string dateTime);
+        public abstract string CalculateNextExecutionDate(string currentDate, GeneralConfiguration generalConfiguration);
 
-        public abstract string SchedulerDescription(string currentDate, string executionDate, string startDate, string endDate, string numDays);
+        public abstract string SchedulerDescription(string currentDate, GeneralConfiguration generalConfiguration, LimitsConfiguration limitsConfiguration);
     }
 }

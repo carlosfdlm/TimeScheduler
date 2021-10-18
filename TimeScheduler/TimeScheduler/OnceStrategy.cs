@@ -5,17 +5,17 @@ namespace TimeScheduler
 {
     public class OnceStrategy : SchedulerStrategy       
     {
-        public override string CalculateNextExecutionDate(string numDays, string currentTime, string dateTime)
+        public override string CalculateNextExecutionDate(string currentTime, GeneralConfiguration generalConfiguration)
         {
-            return dateTime;
+            return generalConfiguration.ExecutionDate;
         }
 
-        public override string SchedulerDescription(string currentDate, string dateTime, string startDate, string endDate, string numDays)
+        public override string SchedulerDescription(string currentDate, GeneralConfiguration generalConfiguration, LimitsConfiguration limitsConfiguration)
         {
             return string.Format(Global.ExecutionDescription,
-               "Once", DateTime.Parse(dateTime).ToShortDateString(),
-               DateTime.Parse(dateTime).ToShortTimeString(),
-                startDate, endDate);
+               "Once", DateTime.Parse(generalConfiguration.ExecutionDate).ToShortDateString(),
+               DateTime.Parse(generalConfiguration.ExecutionDate).ToShortTimeString(),
+                limitsConfiguration.StartDate, limitsConfiguration.EndDate);
         }
     }
 }

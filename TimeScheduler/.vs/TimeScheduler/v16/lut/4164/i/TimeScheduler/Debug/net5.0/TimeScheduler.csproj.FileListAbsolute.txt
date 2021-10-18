@@ -1,0 +1,15 @@
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.exe
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.deps.json
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.runtimeconfig.json
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.runtimeconfig.dev.json
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.dll
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\b\TimeScheduler\Debug\net5.0\ref\TimeScheduler.dll
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.csproj.AssemblyReference.cache
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.Resources.Texts.Global.resources
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.csproj.GenerateResource.cache
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.AssemblyInfoInputs.cache
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.AssemblyInfo.cs
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.dll
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\ref\TimeScheduler.dll
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v16\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.genruntimeconfig.cache

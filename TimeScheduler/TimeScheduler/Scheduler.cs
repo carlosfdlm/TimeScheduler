@@ -1,170 +1,54 @@
-﻿using System;
-using TimeScheduler.Resources.Texts;
-
-namespace TimeScheduler
+﻿namespace TimeScheduler
 {
     public class Scheduler
     {
-        string[] execution;
+        private WeeklyConfiguration weeklyConfiguration;
+        private DailyConfiguration dailyConfiguration;
+        private LimitsConfiguration limitsConfiguration;
+        private GeneralConfiguration generalConfiguration;
 
-        public Scheduler()
+        public Scheduler() 
         {
-            this.execution = new string[2];
+            this.limitsConfiguration = new LimitsConfiguration();
+            this.weeklyConfiguration = new WeeklyConfiguration();
+            this.dailyConfiguration = new DailyConfiguration();
+            this.generalConfiguration = new GeneralConfiguration();
         }
-
-        public string CurrentDate { get; set; }
-        public string ExecutionDate { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public string Enabled { get; set; }
-        public string NumDays { get; set; }
-        public string ExecutionType { get; set; }
 
         public SchedulerStrategy SchedulerStrategy { get; set; }
 
-        public string[] GetNextExecution()
+        public WeeklyConfiguration WeeklyConfiguration
         {
-            this.ValidateFields();
-            execution[0] = this.CalculateNextExecutionDate();
-            execution[1] = this.SchedulerDescription();
-            return execution;
-        }
-
-        private string CalculateNextExecutionDate()
-        {
-            return this.SchedulerStrategy.CalculateNextExecutionDate(this.NumDays, this.CurrentDate, this.ExecutionDate);
-        }
-
-        private string SchedulerDescription()
-        {
-            return this.SchedulerStrategy.SchedulerDescription(this.CurrentDate, this.ExecutionDate, this.StartDate, this.EndDate, this.NumDays);
-        }
-
-        public void ValidateFields()
-        {
-            this.ValidateEnabled();
-            this.ValidateExecutionType();
-            this.ValidateCurrentDate();            
-            if (this.ExecutionType == "Once")
+            get
             {
-                this.ValidateTimeExecution();
-            }
-            else
-            {
-                this.ValidateNumDays();
-                this.ValidateSum();
-            }
-            this.ValidateStartDate();
-            this.ValidateEndDate();
-        }
-
-        private void ValidateSum()
-        {
-            try
-            {
-                DateTime.Parse(this.CurrentDate).AddDays(Double.Parse(this.NumDays));
-            }
-            catch(Exception e)
-            {
-                throw new TimeSchedulerException();
+                return this.weeklyConfiguration;
             }
         }
 
-        private void ValidateStartDate()
+        public DailyConfiguration DailyConfiguration
         {
-            this.ValidateDates(this.StartDate);
-        }
-
-        private void ValidateCurrentDate()
-        {
-            this.ValidateDates(this.CurrentDate);
-        }
-
-        private void ValidateTimeExecution()
-        {
-            this.ValidateDates(this.ExecutionDate);
-        }
-
-        private void ValidateEndDate()
-        {
-            this.ValidateDates(this.EndDate);
-        }
-
-        private void ValidateExecutionType()
-        {
-            if (this.ExecutionType == null)
+            get
             {
-                throw new TimeSchedulerException(Global.DateTimeNotCompleted);
-            }
-            if (string.IsNullOrEmpty(this.ExecutionType.ToString()))
-            {
-                throw new TimeSchedulerException(Global.DateTimeNotCompleted);
-            }
-            if (this.ExecutionType.ToString().Equals("Once") == false &&
-               this.ExecutionType.ToString().Equals("Recurring") == false)
-            {
-                throw new TimeSchedulerException(Global.DateTimeNotCompleted);
-            }
-            this.SchedulerStrategy = this.ExecutionType == "Once" ? new OnceStrategy()
-                : new RecurringStrategy();
-        }
-
-        private void ValidateNumDays()
-        {
-            if (this.NumDays == null)
-            {
-                throw new TimeSchedulerException();
-            }
-            if (string.IsNullOrWhiteSpace(this.NumDays))
-            {
-                throw new TimeSchedulerException();
-            }
-            if (Double.TryParse(this.NumDays, out _) == false)
-            {
-                throw new TimeSchedulerException();
-            }
-            if (Double.Parse(this.NumDays) < 0)
-            {
-                throw new TimeSchedulerException();
+                return this.dailyConfiguration;
             }
         }
 
-        private void ValidateDates(string DateToValidate)
+        public LimitsConfiguration LimitsConfiguration
         {
-            if (DateToValidate == null)
+            get
             {
-                throw new TimeSchedulerException(Global.DateTimeNotCompleted);
-            }
-            if (string.IsNullOrWhiteSpace(DateToValidate))
-            {
-                throw new TimeSchedulerException();
-            }
-            if (DateTime.TryParse(DateToValidate, out _) == false)
-            {
-                throw new TimeSchedulerException();
-            }
-
-        }
-        private void ValidateEnabled()
-        {
-            if (this.Enabled == null)
-            {
-                throw new TimeSchedulerException();
-            }
-            if (string.IsNullOrEmpty(Enabled))
-            {
-                throw new TimeSchedulerException();
-            }
-            if (this.Enabled.Equals("false") == false &&
-                this.Enabled.Equals("true") == false)
-            {
-                throw new TimeSchedulerException();
-            }
-            if (this.Enabled.Equals("false"))
-            {
-                throw new TimeSchedulerException();
+                return this.limitsConfiguration;
             }
         }
 
+        public GeneralConfiguration GeneralConfiguration
+        {
+            get
+            {
+                return this.generalConfiguration;
+            }
+        }
+
+        public string CurrentDate { get; set; }      
     }
 }
