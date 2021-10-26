@@ -15,7 +15,7 @@
             this.generalConfiguration = new GeneralConfiguration();
         }
 
-        public SchedulerStrategy SchedulerStrategy { get; set; }
+        public Execution Execution { get; set; }                 
 
         public WeeklyConfiguration WeeklyConfiguration
         {
@@ -47,8 +47,6 @@
             {
                 return this.generalConfiguration;
             }
-        }
-
-        public string CurrentDate { get; set; }      
+        }    
     }
 }

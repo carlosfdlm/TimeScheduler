@@ -104,3 +104,5 @@ C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\o
 C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\ref\TimeScheduler.Test.dll
 C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.pdb
 C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.genruntimeconfig.cache
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.Resources.Global.resources
+C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.csproj.GenerateResource.cache

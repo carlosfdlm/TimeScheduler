@@ -8,10 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TimeScheduler.Resources.Texts {
+namespace TimeScheduler.Resources.Texts
+{
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,103 +23,125 @@ namespace TimeScheduler.Resources.Texts {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Global {
-        
+    internal class Global
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Global() {
+        internal Global()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TimeScheduler.Resources.Texts.Global", typeof(Global).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The current date isn&apos;t completed..
         /// </summary>
-        internal static string CurrentDateNotCompleted {
-            get {
+        internal static string CurrentDateNotCompleted
+        {
+            get
+            {
                 return ResourceManager.GetString("CurrentDateNotCompleted", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The dateTime isn&apos;t completed..
         /// </summary>
-        internal static string DateTimeNotCompleted {
-            get {
+        internal static string DateTimeNotCompleted
+        {
+            get
+            {
                 return ResourceManager.GetString("DateTimeNotCompleted", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to every day.
         /// </summary>
-        internal static string EveryDay {
-            get {
+        internal static string EveryDay
+        {
+            get
+            {
                 return ResourceManager.GetString("EveryDay", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Occurs {0}. Schedule will be used on {1} at {2} starting on {3} and ending on {4}..
         /// </summary>
-        internal static string ExecutionDescription {
-            get {
+        internal static string ExecutionDescription
+        {
+            get
+            {
                 return ResourceManager.GetString("ExecutionDescription", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Form Closing.
         /// </summary>
-        internal static string FormClosing {
-            get {
+        internal static string FormClosing
+        {
+            get
+            {
                 return ResourceManager.GetString("FormClosing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The scheduler isn&apos;t enabled..
         /// </summary>
-        internal static string NotEnabled {
-            get {
+        internal static string NotEnabled
+        {
+            get
+            {
                 return ResourceManager.GetString("NotEnabled", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The start date isn&apos;t completed..
         /// </summary>
-        internal static string StartDateNotCompleted {
-            get {
+        internal static string StartDateNotCompleted
+        {
+            get
+            {
                 return ResourceManager.GetString("StartDateNotCompleted", resourceCulture);
             }
         }
