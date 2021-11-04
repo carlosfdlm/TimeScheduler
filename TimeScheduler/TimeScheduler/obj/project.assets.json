@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\carlo\\Desktop\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler\\TimeScheduler.csproj",
+      "projectUniqueName": "C:\\Users\\carlo\\OneDrive\\Escritorio\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler\\TimeScheduler.csproj",
       "projectName": "TimeScheduler",
-      "projectPath": "C:\\Users\\carlo\\Desktop\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler\\TimeScheduler.csproj",
+      "projectPath": "C:\\Users\\carlo\\OneDrive\\Escritorio\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler\\TimeScheduler.csproj",
       "packagesPath": "C:\\Users\\carlo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\carlo\\Desktop\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler\\obj\\",
+      "outputPath": "C:\\Users\\carlo\\OneDrive\\Escritorio\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\carlo\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -60,7 +60,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.401\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
       }
     }
   }

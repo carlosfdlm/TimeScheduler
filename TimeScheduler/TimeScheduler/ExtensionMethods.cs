@@ -8,15 +8,15 @@ namespace TimeScheduler
         {
             if (DateToValidate == null)
             {
-                throw new TimeSchedulerException();
+                throw new TimeSchedulerException("is null.");
             }
             if (string.IsNullOrWhiteSpace(DateToValidate))
             {
-                throw new TimeSchedulerException();
+                throw new TimeSchedulerException("is empty.");
             }
             if (DateTime.TryParse(DateToValidate, out _) == false)
             {
-                throw new TimeSchedulerException();
+                throw new TimeSchedulerException("bad format.");
             }
         }
 
@@ -24,15 +24,15 @@ namespace TimeScheduler
         {
             if (HourToValidate == null)
             {
-                throw new TimeSchedulerException();
+                throw new TimeSchedulerException("is null.");
             }
             if (string.IsNullOrEmpty(HourToValidate))
             {
-                throw new TimeSchedulerException();
+                throw new TimeSchedulerException("is empty.");
             }
             if (DateTime.TryParse(HourToValidate, out _) == false)
             {
-                throw new TimeSchedulerException();
+                throw new TimeSchedulerException("bad format.");
             }
         }
 

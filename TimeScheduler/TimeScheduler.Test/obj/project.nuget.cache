@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "htkqxG7PUnqCGvb5wtSQ+8e0Iayi8JpPERt4ckYlPwqyuLDsMFURPcwvZNh3Pb5Z6Jo0YNmAC3RSeriVbLuzZQ==",
+  "dgSpecHash": "8u2aG57jAl42jrPcf9t7CuoG/Z67VMFwAcpsQPq+xFfOp+U0qtpcejZblccY3rCf2icAng+Ol9yrhAoL9QhV9w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\carlo\\Desktop\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler.Test\\TimeScheduler.Test.csproj",
+  "projectFilePath": "C:\\Users\\carlo\\OneDrive\\Escritorio\\Semicrol\\TimeScheduler\\TimeScheduler\\TimeScheduler.Test\\TimeScheduler.Test.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\carlo\\.nuget\\packages\\coverlet.collector\\3.0.2\\coverlet.collector.3.0.2.nupkg.sha512",
     "C:\\Users\\carlo\\.nuget\\packages\\microsoft.codecoverage\\16.9.4\\microsoft.codecoverage.16.9.4.nupkg.sha512",
@@ -91,7 +91,14 @@
     "C:\\Users\\carlo\\.nuget\\packages\\system.threading.tasks.extensions\\4.3.0\\system.threading.tasks.extensions.4.3.0.nupkg.sha512",
     "C:\\Users\\carlo\\.nuget\\packages\\system.threading.timer\\4.3.0\\system.threading.timer.4.3.0.nupkg.sha512",
     "C:\\Users\\carlo\\.nuget\\packages\\system.xml.readerwriter\\4.3.0\\system.xml.readerwriter.4.3.0.nupkg.sha512",
-    "C:\\Users\\carlo\\.nuget\\packages\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512"
+    "C:\\Users\\carlo\\.nuget\\packages\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit\\2.4.1\\xunit.2.4.1.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit.abstractions\\2.0.3\\xunit.abstractions.2.0.3.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit.analyzers\\0.10.0\\xunit.analyzers.0.10.0.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit.assert\\2.4.1\\xunit.assert.2.4.1.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit.core\\2.4.1\\xunit.core.2.4.1.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit.extensibility.core\\2.4.1\\xunit.extensibility.core.2.4.1.nupkg.sha512",
+    "C:\\Users\\carlo\\.nuget\\packages\\xunit.extensibility.execution\\2.4.1\\xunit.extensibility.execution.2.4.1.nupkg.sha512"
   ],
   "logs": []
 }
