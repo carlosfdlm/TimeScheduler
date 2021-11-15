@@ -2,78 +2,43 @@
 {
     public class Scheduler
     {
-        private SchedulerConfiguration schedulerConfiguration;
-        string[] execution;
+        private string[] execution;
+        private readonly SchedulerConfiguration schedulerConfiguration;
 
-
-        public Scheduler() 
+        public Scheduler(SchedulerConfiguration schedulerConfiguration) 
         {
-            this.schedulerConfiguration = new SchedulerConfiguration();
             this.execution = new string[2];
-
+            this.schedulerConfiguration = schedulerConfiguration;
         }
 
-        private SchedulerStrategy Strategy { get; set; }                 
-
-        public SchedulerConfiguration SchedulerConfiguration
-        {
-            get
-            {
-                return this.schedulerConfiguration;
-            }
-        }
+        private ISchedulerStrategy Strategy { get; set; }
 
         public string[] GetNextExecution()
         {
-            this.Validate();
-            execution = this.Strategy.CalculateNextDate(this.SchedulerConfiguration);
+            this.Validate(this.schedulerConfiguration);
+            execution = this.Strategy.CalculateNextDate(this.schedulerConfiguration);
             return execution;
         }
 
-        private void Validate()
+        private void Validate(SchedulerConfiguration schedulerConfiguration)
         {
-            this.ValidateEnabled();
-            this.ValidateStrategy();
+            ValidateEnabled(schedulerConfiguration.Enabled);
+            this.ValidateStrategy(schedulerConfiguration.ExecutionType);
         }
 
-        private void ValidateStrategy()
+        private void ValidateStrategy(ExecutionType executionType)
         {
-            if (this.SchedulerConfiguration.ExecutionType == null)
-            {
-                throw new TimeSchedulerException("Execution type is null.");
-            }
-            if (string.IsNullOrEmpty(this.SchedulerConfiguration.ExecutionType.ToString()))
-            {
-                throw new TimeSchedulerException("Execution type is empty.");
-            }
-            if (this.SchedulerConfiguration.ExecutionType.ToString().Equals("Once") == false &&
-               this.SchedulerConfiguration.ExecutionType.ToString().Equals("Recurring") == false)
-            {
-                throw new TimeSchedulerException("Execution type bad format.");
-            }
-            this.Strategy = this.SchedulerConfiguration.ExecutionType == "Once" ? new OnceStrategy()
+            this.Strategy = executionType == ExecutionType.Once ? new OnceStrategy()
                 : new RecurringStrategy();
         }
 
-        private void ValidateEnabled()
+        private static void ValidateEnabled(bool? enabled)
         {
-            if (this.SchedulerConfiguration.Enabled == null)
+            if (enabled.Value == false)
             {
-                throw new TimeSchedulerException("Enabled check null.");
-            }
-            if (string.IsNullOrEmpty(this.SchedulerConfiguration.Enabled))
-            {
-                throw new TimeSchedulerException("Enabled check empty.");
-            }
-            if (this.SchedulerConfiguration.Enabled.Equals("false") == false &&
-                this.SchedulerConfiguration.Enabled.Equals("true") == false)
-            {
-                throw new TimeSchedulerException("Enabled check bad format.");
-            }
-            if (this.SchedulerConfiguration.Enabled.Equals("false"))
-            {
-                throw new TimeSchedulerException("Enabled check is not enabled.");
+                throw new TimeSchedulerException("Enabled is false.");
             }
         }
+
     }
 }

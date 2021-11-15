@@ -122,5 +122,27 @@ namespace TimeScheduler.Test.Resources {
                 return ResourceManager.GetString("DescriptionRecurringTwoDays", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Occurs every 2 weeks on monday and tuesday every 2 seconds between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00..
+        /// </summary>
+        internal static string DescriptionNextDateRecurringOnce
+        {
+            get
+            {
+                return ResourceManager.GetString("DescriptionNextDateRecurringOnce", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Occurs every 2 weeks on monday and tuesday every 2 seconds between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00..
+        /// </summary>
+        internal static string DescriptionNextDateRecurringEvery
+        {
+            get
+            {
+                return ResourceManager.GetString("DescriptionNextDateRecurringEvery", resourceCulture);
+            }
+        }
     }
 }

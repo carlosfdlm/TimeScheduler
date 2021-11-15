@@ -117,25 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DescriptionNextDateRecurringEvery" xml:space="preserve">
+    <value>Occurs every 2 weeks on {0} every 2 seconds between {1} and {2} starting on {3} and ending on {4}.</value>
+  </data>
+  <data name="DescriptionNextDateRecurringOnce" xml:space="preserve">
+    <value>Occurs every 2 weeks on {0} once at {1} between {2} and {3} starting on {4} and ending on {5}.</value>
+  </data>
   <data name="DescriptionOnce" xml:space="preserve">
-    <value>Occurs Once. Schedule will be used on 01/01/2000 at 00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
+    <value>Occurs Once. Schedule will be used on {0} at {1} starting on {2} and ending on {3}.</value>
   </data>
   <data name="DescriptionRecurringAllDays" xml:space="preserve">
     <value>Occurs every 2 weeks on monday, tuesday, wednesday, thursday, friday, saturday and sunday every 2 seconds between 00:00:00 and 00:00:00 starting on 01/01/2000 and ending on 01/01/2000.</value>
   </data>
   <data name="DescriptionRecurringEveryHours" xml:space="preserve">
-    <value>Occurs every 2 weeks on monday every 2 hours between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
+    <value>Occurs every 2 weeks on monday every 2 hours between {0} and {1} starting on {2} and ending on {3}.</value>
   </data>
   <data name="DescriptionRecurringEveryMinutes" xml:space="preserve">
-    <value>Occurs every 2 weeks on monday every 2 minutes between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
+    <value>Occurs every 2 weeks on monday every 2 minutes between {0} and {1} starting on {2} and ending on {3}.</value>
   </data>
   <data name="DescriptionRecurringEverySeconds" xml:space="preserve">
-    <value>Occurs every 2 weeks on monday every 2 seconds between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
+    <value>Occurs every 2 weeks on monday every 2 seconds between {0} and {1} starting on {2} and ending on {3}.</value>
   </data>
   <data name="DescriptionRecurringOnce" xml:space="preserve">
-    <value>Occurs every 2 weeks on monday once at 00:00:00 between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
+    <value>Occurs every 2 weeks on monday once at 00:00:00 between 00:00 and 00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
   </data>
   <data name="DescriptionRecurringTwoDays" xml:space="preserve">
-    <value>Occurs every 2 weeks on monday and tuesday every 2 seconds between 00:00:00 and 00:00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
+    <value>Occurs every 2 weeks on monday and tuesday every 2 seconds between 00:00 and 00:00 starting on 01/01/2000 00:00:00 and ending on 01/01/2000 00:00:00.</value>
   </data>
 </root>

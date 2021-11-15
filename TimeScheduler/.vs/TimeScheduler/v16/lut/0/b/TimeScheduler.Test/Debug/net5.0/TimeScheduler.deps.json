@@ -18,7 +18,7 @@
         "runtime": {
           "Microsoft.CodeAnalysis.LiveUnitTesting.Runtime.dll": {
             "assemblyVersion": "16.0.0.0",
-            "fileVersion": "16.1100.21.45202"
+            "fileVersion": "16.1100.21.52901"
           }
         }
       }

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace TimeScheduler
 {
-    public class RecurringStrategy : SchedulerStrategy
+    public class RecurringStrategy : ISchedulerStrategy
     {
-        private string[] nextDate;
+        private readonly string[] nextDate;
         private string type;
         private const string DESCRIPTION = "Occurs every {0} weeks on {1} {2} between {3} and {4} starting on {5} and ending on {6}.";
 
@@ -17,13 +17,12 @@ namespace TimeScheduler
         }
 
         public string[] CalculateNextDate(SchedulerConfiguration schedulerConfiguration)
-        {            
-            this.ValidateGeneralConfiguration(schedulerConfiguration);
-            this.ValidateLimitsDates(schedulerConfiguration.StartDate, schedulerConfiguration.EndDate);
+        {
+            ValidateGeneralConfiguration(schedulerConfiguration);
             this.ValidateDailyConfiguration(schedulerConfiguration);
-            this.ValidateWeeklyConfiguration(schedulerConfiguration);
-            
-            this.nextDate[0] = this.CalculateNextExecutionDate(schedulerConfiguration);
+            ValidateWeeklyConfiguration(schedulerConfiguration);
+
+            this.nextDate[0] = CalculateNextExecutionDate(schedulerConfiguration);
             this.nextDate[1] = this.SchedulerDescription(schedulerConfiguration);
             return this.nextDate;
         }
@@ -31,62 +30,56 @@ namespace TimeScheduler
         private string SchedulerDescription(SchedulerConfiguration schedulerConfiguration)
         {
             return string.Format(DESCRIPTION,
-                schedulerConfiguration.EveryTimesWeekly,
-                this.WeekDaysMsg(schedulerConfiguration),
-                this.GetTypeStr(schedulerConfiguration),
-                schedulerConfiguration.StartTime,
-                schedulerConfiguration.EndTime,
+                schedulerConfiguration.EveryTimesWeek,
+                WeekDaysMsg(schedulerConfiguration),
+                this.GetDescriptionType(schedulerConfiguration),
+                schedulerConfiguration.StartingAt.ToShortTimeString(),
+                schedulerConfiguration.EndAt.ToShortTimeString(),
                 schedulerConfiguration.StartDate,
                 schedulerConfiguration.EndDate);
         }
-       
 
-        private void ValidateWeeklyConfiguration(SchedulerConfiguration schedulerConfiguration)
+        private static string CalculateNextExecutionDate(SchedulerConfiguration schedulerConfiguration)
         {
-            this.ValidateEveryWeekly(schedulerConfiguration);
-            this.ValidateDays(schedulerConfiguration);
+
+            return schedulerConfiguration.CurrentDate.AddDays(schedulerConfiguration.NumDays).ToShortDateString();
+        }
+
+        private static void ValidateGeneralConfiguration(SchedulerConfiguration schedulerConfiguration)
+        {
+            ValidateNumDays(schedulerConfiguration.NumDays);
+            ValidateSum(schedulerConfiguration.CurrentDate, schedulerConfiguration.NumDays);
         }
 
         private void ValidateDailyConfiguration(SchedulerConfiguration schedulerConfiguration)
         {
-            this.type = this.ValidateOccursType(schedulerConfiguration);
+            this.type = ValidateOccursType(schedulerConfiguration);
             this.ValidateOccurs(schedulerConfiguration);
-            this.ValidatingStartEndHours(schedulerConfiguration);
         }
 
-        private void ValidateGeneralConfiguration(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateWeeklyConfiguration(SchedulerConfiguration schedulerConfiguration)
         {
-            this.ValidateCurrentDate(schedulerConfiguration.CurrentDate);
-            this.ValidateNumDays(schedulerConfiguration.NumDays);
-            this.ValidateSum(schedulerConfiguration.CurrentDate, schedulerConfiguration.NumDays);
+            ValidateEveryWeekly(schedulerConfiguration.EveryTimesWeek);
+            ValidateDays(schedulerConfiguration);
         }
-              
-        private void ValidateNumDays(string numDays)
+
+        private static void ValidateNumDays(int? numDays)
         {
-            if (numDays == null)
+            if (numDays == 0)
             {
-                throw new TimeSchedulerException("Num days is null.");
+                throw new TimeSchedulerException("Num days is zero.");
             }
-            if (string.IsNullOrWhiteSpace(numDays))
-            {
-                throw new TimeSchedulerException("Num days is empty.");
-            }
-            if (Double.TryParse(numDays, out _) == false)
-            {
-                throw new TimeSchedulerException("Num days bad format.");
-            }
-            if (Double.Parse(numDays) < 0)
+            if (numDays.Value < 0)
             {
                 throw new TimeSchedulerException("Num days is negative.");
             }
         }
 
-        private void ValidateSum(string currentDate, string numDays)
+        private static void ValidateSum(DateTime currentDate, int numDays)
         {
             try
             {
-                DateTime currentTime = DateTime.Parse(currentDate);
-                currentTime.AddDays(Double.Parse(numDays));
+                currentDate.AddDays(numDays);
             }
             catch (Exception)
             {
@@ -94,252 +87,121 @@ namespace TimeScheduler
             }
         }
 
-        private void ValidateCurrentDate(string currentDate)
+        private static string ValidateOccursType(SchedulerConfiguration schedulerConfiguration)
         {
-            currentDate.ValidateDates();
-        }
-
-        private void ValidateLimitsDates(string startDate, string endDate)
-        {
-            try
+            if (schedulerConfiguration.OccursOnce &&
+                schedulerConfiguration.OccursEvery)
             {
-                startDate.ValidateDates();
+                throw new TimeSchedulerException("Occurs is true two times.");
             }
-            catch (TimeSchedulerException exc)
+            if (schedulerConfiguration.OccursOnce == false &&
+               schedulerConfiguration.OccursEvery == false)
             {
-                throw new TimeSchedulerException("Start date " + exc.Message);
+                throw new TimeSchedulerException("Occurs is false two times.");
             }
-            try
+            if (schedulerConfiguration.OccursOnce == false &&
+                schedulerConfiguration.OccursEvery)
             {
-                endDate.ValidateDates();
+                return "every";
             }
-            catch (TimeSchedulerException exc)
+            if (schedulerConfiguration.OccursOnce &&
+                schedulerConfiguration.OccursEvery == false)
             {
-                throw new TimeSchedulerException("End date " + exc.Message);
+                return "once";
             }
-        }
-
-        public void ValidateOccursEvery(SchedulerConfiguration schedulerConfiguration)
-        {
-            if (schedulerConfiguration.EveryType == null)
-            {
-                throw new TimeSchedulerException("Occurs every type is null.");
-            }
-            if (string.IsNullOrEmpty(schedulerConfiguration.EveryType))
-            {
-                throw new TimeSchedulerException("Occurs every type is empty.");
-            }
-            if (schedulerConfiguration.EveryType.ContainsString("hours") == false &&
-                schedulerConfiguration.EveryType.ContainsString("minutes") == false &&
-                schedulerConfiguration.EveryType.ContainsString("seconds") == false)
-            {
-                throw new TimeSchedulerException("Occurs every type bad format.");
-            }
-        }
-
-        private void ValidatingStartEndHours(SchedulerConfiguration schedulerConfiguration)
-        {
-            try
-            {
-                schedulerConfiguration.StartTime.ValidateHour();
-            }
-            catch (TimeSchedulerException exc)
-            {
-                throw new TimeSchedulerException("Start time " + exc.Message);
-            }
-            try
-            {
-                schedulerConfiguration.EndTime.ValidateHour();
-            }
-            catch (TimeSchedulerException exc)
-            {
-                throw new TimeSchedulerException("End time " + exc.Message);
-            }
+            return string.Empty;
         }
 
         private void ValidateOccurs(SchedulerConfiguration schedulerConfiguration)
         {
-            if (this.type.ContainsString("once"))
+            if (this.type.ContainsString("every"))
             {
-                try
-                {
-                    schedulerConfiguration.OccursOnceTime.ValidateHour();
-                }
-                catch (TimeSchedulerException exc)
-                {
-                    throw new TimeSchedulerException("Occurs once time " + exc.Message);
-                }
-            }
-            else if (this.type.ContainsString("every"))
-            {
-                this.ValidateOccursEveryTimes(schedulerConfiguration);
-                this.ValidateOccursEvery(schedulerConfiguration);                
+                ValidateOccursEveryTimes(schedulerConfiguration.EveryTimes);
             }
         }
 
-        private void ValidateDays(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateOccursEveryTimes(int? everyTimes)
         {
-            bool found = false;
-            for (int i = 0; i < schedulerConfiguration.WeekDays.Length; i++)
+            if (everyTimes == 0)
             {
-                if (schedulerConfiguration.WeekDays[i].Contains("true"))
-                {
-                    found = true;
-                }
+                throw new TimeSchedulerException("Occurs every times is zero.");
             }
-            if (found == false)
-            {
-                throw new TimeSchedulerException("Week days is empty.");
-            }
-        }
-
-        private void ValidateEveryWeekly(SchedulerConfiguration schedulerConfiguration)
-        {
-            if (schedulerConfiguration.EveryTimesWeekly == null)
-            {
-                throw new TimeSchedulerException("Weekly times is null.");
-            }
-            if (string.IsNullOrEmpty(schedulerConfiguration.EveryTimesWeekly))
-            {
-                throw new TimeSchedulerException("Weekly times is empty.");
-            }
-            if (Int32.TryParse(schedulerConfiguration.EveryTimesWeekly, out _) == false)
-            {
-                throw new TimeSchedulerException("Weekly times bad format.");
-            }
-            if (Int32.TryParse(schedulerConfiguration.EveryTimesWeekly, out _) &&
-                Int32.Parse(schedulerConfiguration.EveryTimesWeekly) <= 0)
-            {
-                throw new TimeSchedulerException("Weekly times negative.");
-            }
-        }
-
-        private void ValidateOccursEveryTimes(SchedulerConfiguration schedulerConfiguration)
-        {
-            if (schedulerConfiguration.EveryTimes == null)
-            {
-                throw new TimeSchedulerException("Occurs every times is null.");
-            }
-            if (string.IsNullOrEmpty(schedulerConfiguration.EveryTimes))
-            {
-                throw new TimeSchedulerException("Occurs every times is empty.");
-            }
-            if (Int32.TryParse(schedulerConfiguration.EveryTimes, out _) == false)
-            {
-                throw new TimeSchedulerException("Occurs every times bad format.");
-            }
-            if (Int32.TryParse(schedulerConfiguration.EveryTimes, out _) &&
-                Int32.Parse(schedulerConfiguration.EveryTimes) <= 0)
+            if (everyTimes.Value < 0)
             {
                 throw new TimeSchedulerException("Occurs every times is negative.");
             }
         }
 
-        private string ValidateOccursType(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateEveryWeekly(int? everyTimesweek)
         {
-            if (schedulerConfiguration.OccursOnce == null &&
-                schedulerConfiguration.OccursEvery == null)
+            if (everyTimesweek == 0)
             {
-                throw new TimeSchedulerException("Occurs is null.");
+                throw new TimeSchedulerException("Every times week is zero.");
             }
-            if (string.IsNullOrEmpty(schedulerConfiguration.OccursOnce) &&
-                string.IsNullOrEmpty(schedulerConfiguration.OccursEvery))
+            if (everyTimesweek.Value < 0)
             {
-                throw new TimeSchedulerException("Occurs is empty.");
+                throw new TimeSchedulerException("Every times week is negative.");
             }
-            if (schedulerConfiguration.OccursOnce != null &&
-                schedulerConfiguration.OccursOnce.ContainsString("true") &&
-                schedulerConfiguration.OccursEvery == null)
-            {
-                return "once";
-            }
-            if (schedulerConfiguration.OccursOnce == null &&
-                schedulerConfiguration.OccursEvery.ContainsString("true"))
-            {
-                return "every";
-            }
-            if (schedulerConfiguration.OccursOnce.ContainsString("true") == false &&
-                schedulerConfiguration.OccursEvery.ContainsString("true"))
-            {
-                return "every";
-            }
-            if (schedulerConfiguration.OccursOnce.ContainsString("true") &&
-                schedulerConfiguration.OccursEvery.ContainsString("true") == false)
-            {
-                return "once";
-            }
-            if (schedulerConfiguration.OccursOnce.ContainsString("true") &&
-               schedulerConfiguration.OccursEvery.ContainsString("true"))
-            {
-                throw new TimeSchedulerException("Occurs is two times true.");
-            }
-            if (schedulerConfiguration.OccursOnce.ContainsString("true") == false &&
-                schedulerConfiguration.OccursEvery.ContainsString("false") == false)
-            {
-                throw new TimeSchedulerException("Occurs bad format.");
-            }
-            if (schedulerConfiguration.OccursOnce.ContainsString("false") &&
-             schedulerConfiguration.OccursEvery.ContainsString("false"))
-            {
-                throw new TimeSchedulerException("Occurs is two times false.");
-            }
-            return string.Empty;
         }
 
-        private string GetTypeStr(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateDays(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (schedulerConfiguration.MondayEnabled == false &&
+                schedulerConfiguration.TuesdayEnabled == false &&
+                schedulerConfiguration.WednesdayEnabled == false &&
+                schedulerConfiguration.ThursdayEnabled == false &&
+                schedulerConfiguration.FridayEnabled == false &&
+                schedulerConfiguration.SaturdayEnabled == false &&
+                schedulerConfiguration.SundayEnabled == false)
+            {
+                throw new TimeSchedulerException("No week days selected.");
+            }
+        }
+
+        private string GetDescriptionType(SchedulerConfiguration schedulerConfiguration)
         {
             if (this.type.ContainsString("every"))
             {
-                return "every " + schedulerConfiguration.EveryTimes.ToString() + " " + schedulerConfiguration.EveryType;
+                return "every " + schedulerConfiguration.EveryTimes.ToString() + " " + schedulerConfiguration.TimeUnit.ToString().ToLower();
             }
             else
             {
-                return "once at " + schedulerConfiguration.OccursOnceTime;
+                return "once at " + schedulerConfiguration.OccursOnceTime.ToShortTimeString();
             }
         }
 
-        public string WeekDaysMsg(SchedulerConfiguration schedulerConfiguration)
+        public static string WeekDaysMsg(SchedulerConfiguration schedulerConfiguration)
         {
-            List<string> weekDaysStr = new List<string>();
-            for (int i = 0; i < schedulerConfiguration.WeekDays.Length; i++)
+            List<string> weekDaysStr = new();
+            if (schedulerConfiguration.MondayEnabled)
             {
-                if (i == 0 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("monday");
-                }
-                if (i == 1 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("tuesday");
-                }
-                if (i == 2 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("wednesday");
-                }
-                if (i == 3 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("thursday");
-                }
-                if (i == 4 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("friday");
-                }
-                if (i == 5 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("saturday");
-                }
-                if (i == 6 &&
-                    schedulerConfiguration.WeekDays[i].ContainsString("true"))
-                {
-                    weekDaysStr.Add("sunday");
-                }
+                weekDaysStr.Add("monday");
             }
-            StringBuilder weekDaysMsg = new StringBuilder();
+            if (schedulerConfiguration.TuesdayEnabled)
+            {
+                weekDaysStr.Add("tuesday");
+            }
+            if (schedulerConfiguration.WednesdayEnabled)
+            {
+                weekDaysStr.Add("wednesday");
+            }
+            if (schedulerConfiguration.ThursdayEnabled)
+            {
+                weekDaysStr.Add("thursday");
+            }
+            if (schedulerConfiguration.FridayEnabled)
+            {
+                weekDaysStr.Add("friday");
+            }
+            if (schedulerConfiguration.SaturdayEnabled)
+            {
+                weekDaysStr.Add("saturday");
+            }
+            if (schedulerConfiguration.SundayEnabled)
+            {
+                weekDaysStr.Add("sunday");
+            }
+            StringBuilder weekDaysMsg = new();
             for (int i = 0; i < weekDaysStr.Count; i++)
             {
                 weekDaysMsg.Append(weekDaysStr[i]);
@@ -354,11 +216,5 @@ namespace TimeScheduler
             }
             return weekDaysMsg.ToString();
         }
-
-        private string CalculateNextExecutionDate(SchedulerConfiguration schedulerConfiguration)
-        {
-
-            return DateTime.Parse(schedulerConfiguration.CurrentDate).AddDays(Double.Parse(schedulerConfiguration.NumDays)).ToString();
-        }       
     }
 }

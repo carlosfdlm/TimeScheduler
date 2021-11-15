@@ -1,8 +1,7 @@
 ﻿namespace TimeScheduler
 {
-    public interface SchedulerStrategy
+    public interface ISchedulerStrategy
     {
         public string[] CalculateNextDate(SchedulerConfiguration schedulerConfiguration);
-
     }
 }
