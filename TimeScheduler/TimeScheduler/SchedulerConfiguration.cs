@@ -11,13 +11,12 @@ namespace TimeScheduler
         public DateTime CurrentDate { get; set; }
         public DateTime ExecutionDate { get; set; }
         public bool Enabled { get; set; }
-        public int NumDays { get; set; }
         public ExecutionType ExecutionType { get; set; }
 
         #endregion GeneralConfiguration
 
         #region DailyConfiguration
-
+        public OccursType OccursType { get; set; }  
         public bool OccursEvery { get; set; }
         public bool OccursOnce { get; set; }
         public DateTime OccursOnceTime { get; set; }
@@ -62,5 +61,11 @@ namespace TimeScheduler
         Seconds,
         Minutes,
         Hours
+    }
+
+    public enum OccursType
+    {
+        Once,
+        Every
     }
 }
