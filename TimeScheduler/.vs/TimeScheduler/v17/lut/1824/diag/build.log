@@ -1,0 +1,51 @@
+[18:38:15.275 Verbose] - BuildManager - C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\SchedulerConfigurationExtensions.cs(147,24): error CS0103: The name 'NextDateSeconds' does not exist in the current context
+[18:38:15.275 Verbose] - BuildManager - C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\SchedulerConfigurationExtensions.cs(151,24): error CS0103: The name 'NextDateMinutes' does not exist in the current context
+[18:38:15.275 Verbose] - BuildManager - C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\SchedulerConfigurationExtensions.cs(155,24): error CS0103: The name 'NextDateHours' does not exist in the current context
+[18:38:15.275 Verbose] - BuildManager - C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn\Microsoft.CSharp.Core.targets(75,5): error MSB4181: The "Csc" task returned false but did not log an error.
+[18:38:15.280 Verbose] - BuildManager - Some of the file paths defined in the csproj under the Live Unit Testing build path are missing. Verify whether these files should be present under the Live Unit Testing build path and if necessary update the csproj definition to look these files up in a different place.
+[18:38:15.280 Verbose] - BuildManager - Item _OutputPathItem 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\Debug\net5.0\' evaluated via:
+_OutputPathItem: '$(OutDir)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:310
+  OutDir: '$(OutputPath)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:228
+    OutputPath: '$(OutputPath)$(TargetFramework.ToLowerInvariant())\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets:245
+      OutputPath: '$(BaseOutputPath)$(Configuration)\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets:33
+        BaseOutputPath: 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\' @ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\TimeScheduler.csproj:0
+        Configuration: 'Debug'
+[18:38:15.280 Verbose] - BuildManager - Item AppConfigFileDestination 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.dll.config' evaluated via:
+AppConfigFileDestination: '$(OutDir)$(TargetFileName).config' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:338
+  OutDir: '$(OutputPath)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:228
+    OutputPath: '$(OutputPath)$(TargetFramework.ToLowerInvariant())\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets:245
+      OutputPath: '$(BaseOutputPath)$(Configuration)\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets:33
+        BaseOutputPath: 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\' @ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\TimeScheduler.csproj:0
+        Configuration: 'Debug'
+  TargetFileName: '$(TargetName)$(TargetExt)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:248
+    TargetName: '$(AssemblyName)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:240
+      AssemblyName: '$(MSBuildProjectName)' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.props:32
+        MSBuildProjectName: 'TimeScheduler'
+    TargetExt: '.dll' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets:106
+[18:38:15.280 Verbose] - BuildManager - Item CreateDirectory 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\Debug\net5.0\ref' evaluated via:
+CreateDirectory: '$(OutDir)ref' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:398
+  OutDir: '$(OutputPath)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:228
+    OutputPath: '$(OutputPath)$(TargetFramework.ToLowerInvariant())\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets:245
+      OutputPath: '$(BaseOutputPath)$(Configuration)\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets:33
+        BaseOutputPath: 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\' @ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\TimeScheduler.csproj:0
+        Configuration: 'Debug'
+[18:38:15.281 Verbose] - BuildManager - Item _DebugSymbolsOutputPath 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.pdb' evaluated via:
+_DebugSymbolsOutputPath: '@(_DebugSymbolsIntermediatePath->'$(OutDir)%(Filename)%(Extension)')' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:404
+  OutDir: '$(OutputPath)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:228
+    OutputPath: '$(OutputPath)$(TargetFramework.ToLowerInvariant())\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets:245
+      OutputPath: '$(BaseOutputPath)$(Configuration)\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets:33
+        BaseOutputPath: 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\' @ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\TimeScheduler.csproj:0
+        Configuration: 'Debug'
+[18:38:15.281 Verbose] - BuildManager - Item _ApplicationManifestFinal 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\Debug\net5.0\TimeScheduler.dll.manifest' evaluated via:
+_ApplicationManifestFinal: '$(OutDir)$(_DeploymentTargetApplicationManifestFileName)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:442
+  OutDir: '$(OutputPath)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:228
+    OutputPath: '$(OutputPath)$(TargetFramework.ToLowerInvariant())\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets:245
+      OutputPath: '$(BaseOutputPath)$(Configuration)\' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.DefaultOutputPaths.targets:33
+        BaseOutputPath: 'C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\b\TimeScheduler\' @ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\TimeScheduler.csproj:0
+        Configuration: 'Debug'
+  _DeploymentTargetApplicationManifestFileName: '$(TargetFileName).manifest' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:268
+    TargetFileName: '$(TargetName)$(TargetExt)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:248
+      TargetName: '$(AssemblyName)' @ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets:240
+        AssemblyName: '$(MSBuildProjectName)' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.props:32
+          MSBuildProjectName: 'TimeScheduler'
+      TargetExt: '.dll' @ C:\Program Files\dotnet\sdk\6.0.100\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets:106

@@ -14,9 +14,8 @@ namespace TimeScheduler
         public ExecutionType ExecutionType { get; set; }
 
         #endregion GeneralConfiguration
-
         #region DailyConfiguration
-        public OccursType OccursType { get; set; }  
+        public OccursType OccursType { get; set; }
         public bool OccursEvery { get; set; }
         public bool OccursOnce { get; set; }
         public DateTime OccursOnceTime { get; set; }
@@ -26,22 +25,18 @@ namespace TimeScheduler
         public DateTime EndAt { get; set; }
 
         #endregion DailyConfiguration
+        #region MonthlyConfiguration
 
+        public int MonthsDay { get; set; }
+        public FrecuencyType FrecuencyType { get; set; }
+        public bool DaySelector { get; set; }
+        public bool WeekDaySelector { get; set; }
+        public int TheDay { get; set; }
+        public int EveryMonthDay { get; set; }
+        public SelectedDays DayOfWeek { get; set; }
+        public MonthlyType MonthlyType { get; set; }
 
-        #region WeeklyConfiguration
-
-        public int EveryTimesWeek { get; set; }
-
-        public bool MondayEnabled { get; set; }
-        public bool TuesdayEnabled { get; set; }
-        public bool WednesdayEnabled { get; set; }
-        public bool ThursdayEnabled { get; set; }
-        public bool FridayEnabled { get; set; }
-        public bool SaturdayEnabled { get; set; }
-        public bool SundayEnabled { get; set; }
-
-        #endregion WeeklyConfiguration
-
+        #endregion MonthlyConfiguration
         #region LimitsConfiguration
 
         public DateTime StartDate { get; set; }
@@ -50,7 +45,7 @@ namespace TimeScheduler
         #endregion LimitsConfiguration
     }
 
-    public enum ExecutionType 
+    public enum ExecutionType
     {
         Once,
         Recurring
@@ -68,4 +63,34 @@ namespace TimeScheduler
         Once,
         Every
     }
+
+    public enum FrecuencyType
+    {
+        First,
+        Second,
+        Third,
+        Fourth,
+        Last
+    }
+
+    public enum SelectedDays
+    {
+        Monday,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+        Sunday,
+        Day,
+        Weekday,
+        WeekendDay
+    }
+
+    public enum MonthlyType
+    {
+        Day,
+        WeeksDay
+    }
+
 }
