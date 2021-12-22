@@ -1,5 +1,4 @@
 using Xunit;
-using TimeScheduler.Test.Resources;
 using FluentAssertions;
 using System;
 
@@ -20,733 +19,1358 @@ namespace TimeScheduler.Test
         }
 
         [Fact]
-        public void Validate_Next_Daily_Configuration_Occurs_False()
+        public void Validate_End_Date_Less_Than_Start_Date()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
-                ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
-                StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = false,
-                OccursEvery = false
+                ExecutionType = ExecutionType.Once,
+                StartDate = new DateTime(2000, 2, 1),
+                EndDate = new DateTime(2000, 1, 1)
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Occurs is false two times.");
-        }
-
-
-        [Fact]
-        public void Validate_Next_Daily_Configuration_Occurs_True()
-        {
-            SchedulerConfiguration schedulerConfiguration = new()
-            {
-                Enabled = true,
-                ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
-                StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = true
-            };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
-                .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Occurs is true two times.");
+                .WithMessage("End date is less than start date.");
         }
 
         [Fact]
-        public void Validate_Next_Daily_Configuration_Occurs_Every_Times_Null()
+        public void Validate_Once_Date_Time_Is_Less_Than_Current_Date()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
-                ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                ExecutionType = ExecutionType.Once,
+                CurrentDate = new DateTime(2000, 2, 1),
+                OnceDateTime = new DateTime(2000, 1, 1),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = false,
-                OccursEvery = true
+                EndDate = new DateTime(2000, 2, 1)
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Occurs every times is zero.");
+                .WithMessage("Once date time is less than current date.");
         }
 
         [Fact]
-        public void Validate_Next_Daily_Configuration_Occurs_Every_Less_Than_Zero()
+        public void Validate_Current_Date_Is_Out_Of_Range()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
-                ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                ExecutionType = ExecutionType.Once,
+                CurrentDate = new DateTime(2000, 3, 1),
+                OnceDateTime = new DateTime(2000, 4, 1),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = false,
-                OccursEvery = true,
-                EveryTimes = -1
+                EndDate = new DateTime(2000, 2, 1)
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Occurs every times is negative.");
+                .WithMessage("Current date is out of range.");
         }
 
         [Fact]
-        public void Validate_MontlyType_False()
+        public void Validate_Once_Execution()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
-                ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                ExecutionType = ExecutionType.Once,
+                CurrentDate = new DateTime(2000, 3, 1),
+                OnceDateTime = new DateTime(2000, 4, 1),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = false,
-                OccursEvery = true,
-                EveryTimes = 1,
-                DaySelector = false,
-                WeekDaySelector = false
+                EndDate = new DateTime(2000, 10, 1)
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
-                .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Monthly Type is false two times.");
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution = new DateTime(2000, 4, 1);
+            result.Description = $"Occurs Once. Schedule will be used on {new DateTime(2000, 4, 1).ToShortDateString()}" +
+                $" at {new DateTime(2000, 4, 1).ToShortTimeString()} starting on { new DateTime(2000, 1, 1).ToShortDateString()}" +
+                $" and ending on {new DateTime(2000, 10, 1).ToShortDateString()}";
         }
 
         [Fact]
-        public void Validate_MontlyType_True()
+        public void Validate_End_Time_Less_Than_Start_Time()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(2, 0, 0),
+                EndTime = new TimeSpan(0, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = false,
-                OccursEvery = true,
-                EveryTimes = 1,
-                DaySelector = true,
-                WeekDaySelector = true
+                EndDate = new DateTime(2000, 10, 1)
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Monthly Type is true two times.");
+                .WithMessage("The end time is less than the start time.");
         }
 
         [Fact]
-        public void Validate_Next_Monthly_Configuration_Every_Day_Negative()
+        public void Validate_Once_Time_Out_Of_Range()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = false,
-                OccursOnceTime = new DateTime(2000, 1, 1),
-                StartingAt = new DateTime(2000, 1, 1),
-                EndAt = new DateTime(2000, 1, 1),
-                DaySelector = true,
-                WeekDaySelector = false,
-                EveryMonthDay = -1
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Once,
+                OccursOnceTime = new TimeSpan(9, 0, 0)
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Every month day can't be negative.");
+                .WithMessage("Occurs once time is out of range.");
         }
 
         [Fact]
-        public void Validate_Next_Monthly_Configuration_Every_Day_Zero()
+        public void Validate_Time_Unit_Frequency_Zero()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = false,
-                OccursOnceTime = new DateTime(2000, 1, 1),
-                StartingAt = new DateTime(2000, 1, 1),
-                EndAt = new DateTime(2000, 1, 1),
-                DaySelector = true,
-                WeekDaySelector = false,
-                EveryMonthDay = 32
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 0
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Every month day out of range.");
+                .WithMessage("The times of time unit is zero.");
         }
 
         [Fact]
-        public void Validate_Next_Monthly_Configuration_Every_Months_Of_Day_Negative()
+        public void Validate_Time_Unit_Frequency_Negative()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = false,
-                OccursOnceTime = new DateTime(2000, 1, 1),
-                StartingAt = new DateTime(2000, 1, 1),
-                EndAt = new DateTime(2000, 1, 1),
-                DaySelector = true,
-                WeekDaySelector = false,
-                EveryMonthDay = 3,
-                MonthsDay = -2
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = -1
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Every months is negative.");
+                .WithMessage("The times of time unit is negative.");
         }
 
         [Fact]
-        public void Validate_Next_Monthly_Configuration_Every_Months_Of_Day_Zero()
+        public void Validate_Week_Frequency_Zero()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = false,
-                OccursOnceTime = new DateTime(2000, 1, 1),
-                StartingAt = new DateTime(2000, 1, 1),
-                EndAt = new DateTime(2000, 1, 1),
-                DaySelector = true,
-                WeekDaySelector = false,
-                EveryMonthDay = 3,
-                MonthsDay = 0
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Weekly,
+                WeekFrequency = 0
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Every months is zero.");
+                .WithMessage("The week frequency is zero.");
         }
 
         [Fact]
-        public void Validate_Next_Monthly_Configuration_Every_Months_Of_WeekDay_Negative()
+        public void Validate_Week_Frequency_Negative()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = false,
-                OccursOnceTime = new DateTime(2000, 1, 1),
-                StartingAt = new DateTime(2000, 1, 1),
-                EndAt = new DateTime(2000, 1, 1),
-                DaySelector = false,
-                WeekDaySelector = true,
-                EveryMonthDay = -2
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Weekly,
+                WeekFrequency = -1
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Every months is negative.");
+                .WithMessage("The week frequency is negative.");
         }
 
         [Fact]
-        public void Validate_Next_Monthly_Configuration_Every_Months_Of_WeekDay_Zero()
+        public void Validate_Not_Week_Days()
         {
             SchedulerConfiguration schedulerConfiguration = new()
             {
                 Enabled = true,
                 ExecutionType = ExecutionType.Recurring,
-                CurrentDate = new DateTime(2000, 1, 1),
-                ExecutionDate = new DateTime(2000, 1, 1),
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
                 StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2000, 1, 1),
-                OccursOnce = true,
-                OccursEvery = false,
-                OccursOnceTime = new DateTime(2000, 1, 1),
-                StartingAt = new DateTime(2000, 1, 1),
-                EndAt = new DateTime(2000, 1, 1),
-                DaySelector = false,
-                WeekDaySelector = true,
-                EveryMonthDay = 0
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Weekly,
+                WeekFrequency = 1
             };
-            schedulerConfiguration.Invoking(y => y.GetNextExecution())
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
                 .Should().Throw<TimeSchedulerException>()
-                .WithMessage("Every months is zero.");
+                .WithMessage("No week days selected.");
         }
 
-        //[Fact]
-        //public void Validate_Next_Weekly_Configuration_No_Week_Day()
-        //{
-        //    SchedulerConfiguration schedulerConfiguration = new()
-        //    {
-        //        Enabled = true,
-        //        ExecutionType = ExecutionType.Recurring,
-        //        CurrentDate = new DateTime(2000, 1, 1),
-        //        ExecutionDate = new DateTime(2000, 1, 1),
-        //        StartDate = new DateTime(2000, 1, 1),
-        //        EndDate = new DateTime(2000, 1, 1),
-        //        OccursOnce = true,
-        //        OccursEvery = false,
-        //        OccursOnceTime = new DateTime(2000, 1, 1),
-        //        StartingAt = new DateTime(2000, 1, 1),
-        //        EndAt = new DateTime(2000, 1, 1),
-        //        EveryTimesWeek = 1
-        //    };
-        //    schedulerConfiguration.Invoking(y => y.GetNextExecution())
-        //        .Should().Throw<TimeSchedulerException>()
-        //        .WithMessage("No week days selected.");
-        //}
+        [Fact]
+        public void Validate_Every_Month_Zero()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                EveryMonth = 0
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("Every month is zero.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Once()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Once,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1)
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution.Length.Should().Be(2);
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionOnce,
-        //                                                       new DateTime(2000, 1, 1).ToShortDateString(),
-        //                                                       new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                       new DateTime(2000, 1, 1),
-        //                                                       new DateTime(2000, 1, 1)));
-        //        }
+        [Fact]
+        public void Validate_Every_Month_Is_Negative()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                EveryMonth = -1
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("Every month is negative.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Hours()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Hours,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionRecurringEveryHours,
-        //                                                     new DateTime(2000, 1, 2).ToShortTimeString(),
-        //                                                     new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                     new DateTime(2000, 1, 1),
-        //                                                     new DateTime(2000, 1, 1)));
-        //        }
+        [Fact]
+        public void Validate_Month_Day_Is_Zero()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                EveryMonth = 1,
+                MonthlyType = MonthlyType.Day,
+                DayOfMonth = 0
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("Day of month is zero.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Minutes()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Minutes,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionRecurringEveryMinutes,
-        //                                                     new DateTime(2000, 1, 2).ToShortTimeString(),
-        //                                                     new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                     new DateTime(2000, 1, 1),
-        //                                                     new DateTime(2000, 1, 1)));
-        //        }
+        [Fact]
+        public void Validate_Month_Day_Is_Negative()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                EveryMonth = 1,
+                MonthlyType = MonthlyType.Day,
+                DayOfMonth = -1
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("Day of month is negative.");
+        }
 
+        [Fact]
+        public void Validate_Frequency_Days_Is_Zero()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 0
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("The frequency days is zero.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Seconds()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Seconds,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionRecurringEverySeconds,
-        //                                                    new DateTime(2000, 1, 2).ToShortTimeString(),
-        //                                                    new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                    new DateTime(2000, 1, 1),
-        //                                                    new DateTime(2000, 1, 1)));
-        //        }
+        [Fact]
+        public void Validate_Frequency_Days_Is_Negative()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = -1
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("The frequency days is negative.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Once_Monday()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = true,
-        //                OccursEvery = false,
-        //                OccursOnceTime = new DateTime(2000, 1, 1),
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                MondayEnabled = true
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionNextDateRecurringOnce,
-        //                                                            "monday",
-        //                                                            new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                            new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                            new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                                                            new DateTime(2000, 1, 1).ToString(),
-        //                                                            new DateTime(2000, 1, 1).ToString()));
-        //        }
+        [Fact]
+        public void Validate_Daily_Frequency_Max_Date()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(9999, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(9999, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 9999
+            };
+            schedulerConfiguration.Invoking(s => s.GetNextExecution())
+                .Should().Throw<TimeSchedulerException>()
+                .WithMessage("The date can't be represented.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Once_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday_And_Sunday()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = true,
-        //                OccursEvery = false,
-        //                OccursOnceTime = new DateTime(2000, 1, 1),
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                MondayEnabled = true,
-        //                TuesdayEnabled = true,
-        //                WednesdayEnabled = true,
-        //                ThursdayEnabled = true,
-        //                FridayEnabled = true,
-        //                SaturdayEnabled = true,
-        //                SundayEnabled = true
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionNextDateRecurringOnce,
-        //                            "monday, tuesday, wednesday, thursday, friday, saturday and sunday",
-        //                            new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                            new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                            new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                            new DateTime(2000, 1, 1).ToString(),
-        //                            new DateTime(2000, 1, 1).ToString()));
-        //        }
+        [Fact]
+        public void Validate_Daily_Recurring_Description_Hour()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 1
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 1, 0, 0, 0));
+            result.Description.Should().Be("Occurs every day. Schedule will be used on 01/01/2000 at " +
+                "00:00:00 every 1 Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Monday()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Seconds,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true,
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionNextDateRecurringEvery,
-        //                        "monday",
-        //                        new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                        new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                        new DateTime(2000, 1, 1).ToString(),
-        //                        new DateTime(2000, 1, 1).ToString()));
-        //        }
+        [Fact]
+        public void Validate_Daily_Recurring_Description_Seconds()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Seconds,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 1
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 1, 0, 0, 0));
+            result.Description.Should().Be("Occurs every day. Schedule will be used on 01/01/2000 at " +
+                "00:00:00 every 1 Seconds between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday_And_Sunday()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Seconds,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true,
-        //                TuesdayEnabled = true,
-        //                WednesdayEnabled = true,
-        //                ThursdayEnabled = true,
-        //                FridayEnabled = true,
-        //                SaturdayEnabled = true,
-        //                SundayEnabled = true
-        //            };
-        //            var execution = schedulerConfiguration.GetNextExecution();
-        //            execution[0].Should().Be(new DateTime(2000, 1, 1).ToShortDateString() + " " + new DateTime(2000, 1, 1).ToShortTimeString());
-        //            execution[1].Should().Be(string.Format(Global.DescriptionNextDateRecurringEvery,
-        //                         "monday, tuesday, wednesday, thursday, friday, saturday and sunday",
-        //                         new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                         new DateTime(2000, 1, 1).ToShortTimeString(),
-        //                         new DateTime(2000, 1, 1).ToString(),
-        //                         new DateTime(2000, 1, 1).ToString()));
-        //        }
+        [Fact]
+        public void Validate_Daily_Recurring_Description_Minutes()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Minutes,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 1
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 1));
+            result.Description.Should().Be("Occurs every day. Schedule will be used on 01/01/2000 at " +
+                "00:00:00 every 1 Minutes between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Seconds_Series()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1, 0, 0, 40),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Seconds,
-        //                EveryTimes = 15,
-        //                MondayEnabled = true,
-        //                TuesdayEnabled = true,
-        //                WednesdayEnabled = true,
-        //                ThursdayEnabled = true,
-        //                FridayEnabled = true,
-        //                SaturdayEnabled = true,
-        //                SundayEnabled = true
-        //            };
+        [Fact]
+        public void Validate_Daily_Recurring_Description_Hour_Seconds_Series()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Seconds,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 1
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 01, 01, 0, 0, 10));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 01, 01, 0, 0, 20));
+            result[10].Description.Should().Be("Occurs every day. Schedule will be used on 01/01/2000 at " +
+                "00:00:00 every 1 Seconds between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //            var result = schedulerConfiguration.CalculateSerie(8);
-        //            result[0].Should().Be(new DateTime(2000, 1, 1, 0, 0, 0).ToString());
-        //            result[1].Should().Be(new DateTime(2000, 1, 1, 0, 0, 15).ToString());
-        //            result[2].Should().Be(new DateTime(2000, 1, 1, 0, 0, 30).ToString());
-        //            result[3].Should().Be(new DateTime(2000, 1, 2, 0, 0, 5).ToString());
-        //            result[4].Should().Be(new DateTime(2000, 1, 2, 0, 0, 20).ToString());
-        //            result[5].Should().Be(new DateTime(2000, 1, 2, 0, 0, 35).ToString());
-        //            result[6].Should().Be(new DateTime(2000, 1, 3, 0, 0, 10).ToString());
-        //            result[7].Should().Be(new DateTime(2000, 1, 3, 0, 0, 25).ToString());
-        //        }
+        [Fact]
+        public void Validate_Daily_Recurring_Description_Minute_Series()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Minutes,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 1
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 01, 01, 0, 10, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 01, 01, 0, 20, 0));
+            result[10].Description.Should().Be("Occurs every day. Schedule will be used on 01/01/2000 at " +
+                "00:00:00 every 1 Minutes between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Minutes_Series()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1, 0, 10, 0),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Minutes,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true,
-        //                TuesdayEnabled = true,
-        //                WednesdayEnabled = true,
-        //                ThursdayEnabled = true,
-        //                FridayEnabled = true,
-        //                SaturdayEnabled = true,
-        //                SundayEnabled = true
-        //            };
+        [Fact]
+        public void Validate_Daily_Recurring_Description_Hour_Series()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Daily,
+                FrequencyDays = 1
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 01, 04, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 01, 07, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs every day. Schedule will be used on 01/01/2000 at " +
+                "00:00:00 every 1 Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //            var result = schedulerConfiguration.CalculateSerie(8);
-        //            result[0].Should().Be(new DateTime(2000, 1, 1, 0, 0, 0).ToString());
-        //            result[1].Should().Be(new DateTime(2000, 1, 1, 0, 2, 0).ToString());
-        //            result[2].Should().Be(new DateTime(2000, 1, 1, 0, 4, 0).ToString());
-        //            result[3].Should().Be(new DateTime(2000, 1, 1, 0, 6, 0).ToString());
-        //            result[4].Should().Be(new DateTime(2000, 1, 1, 0, 8, 0).ToString());
-        //            result[5].Should().Be(new DateTime(2000, 1, 1, 0, 10, 0).ToString());
-        //            result[6].Should().Be(new DateTime(2000, 1, 2, 0, 0, 0).ToString());
-        //            result[7].Should().Be(new DateTime(2000, 1, 2, 0, 2, 0).ToString());
-        //        }
+        [Fact]
+        public void Validate_Weekly_Recurring_Description_Hour()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Weekly,
+                FrequencyDays = 1,
+                WeekFrequency = 2,
+                MondayEnabled = true
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 3, 0, 0, 0));
+            result.Description.Should().Be("Occurs every 2 weeks on monday every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Hours_Series()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1, 10, 0, 0),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Hours,
-        //                EveryTimes = 2,
-        //                MondayEnabled = true,
-        //                TuesdayEnabled = true,
-        //                WednesdayEnabled = true,
-        //                ThursdayEnabled = true,
-        //                FridayEnabled = true,
-        //                SaturdayEnabled = true,
-        //                SundayEnabled = true
-        //            };
+        [Fact]
+        public void Validate_Weekly_Recurring_Description_Hour_Series()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Weekly,
+                FrequencyDays = 1,
+                WeekFrequency = 2,
+                MondayEnabled = true,
+                WednesdayEnabled = true
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 01, 12, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 01, 24, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs every 2 weeks on monday and wednesday every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //            var result = schedulerConfiguration.CalculateSerie(8);
-        //            result[0].Should().Be(new DateTime(2000, 1, 1, 0, 0, 0).ToString());
-        //            result[1].Should().Be(new DateTime(2000, 1, 1, 2, 0, 0).ToString());
-        //            result[2].Should().Be(new DateTime(2000, 1, 1, 4, 0, 0).ToString());
-        //            result[3].Should().Be(new DateTime(2000, 1, 1, 6, 0, 0).ToString());
-        //            result[4].Should().Be(new DateTime(2000, 1, 1, 8, 0, 0).ToString());
-        //            result[5].Should().Be(new DateTime(2000, 1, 1, 10, 0, 0).ToString());
-        //            result[6].Should().Be(new DateTime(2000, 1, 2, 0, 0, 0).ToString());
-        //            result[7].Should().Be(new DateTime(2000, 1, 2, 2, 0, 0).ToString());
-        //        }
+        [Fact]
+        public void Validate_Weekly_Recurring_Description_Hour_Series_Different_Days()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Weekly,
+                FrequencyDays = 1,
+                WeekFrequency = 2,
+                MondayEnabled = true,
+                WednesdayEnabled = true,
+                TuesdayEnabled = true,
+                ThursdayEnabled = true,
+                FridayEnabled = true,
+                SaturdayEnabled = true,
+                SundayEnabled = true
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 01, 05, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 01, 08, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs every 2 weeks on monday, tuesday, wednesday, thursday, friday, saturday and sunday every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Hours_Monday_And_Tuesday_Series()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1, 10, 0, 0),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Hours,
-        //                EveryTimes = 4,
-        //                MondayEnabled = true,
-        //                WednesdayEnabled = true,             
-        //            };
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_First_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.First,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 4, 0, 0, 0));
+            result.Description.Should().Be("Occurs the First Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //            var result = schedulerConfiguration.CalculateSerie(8);
-        //            result[0].Should().Be(new DateTime(2000, 1, 1, 0, 0, 0).ToString());
-        //            result[1].Should().Be(new DateTime(2000, 1, 1, 4, 0, 0).ToString());
-        //            result[2].Should().Be(new DateTime(2000, 1, 1, 8, 0, 0).ToString());
-        //            result[3].Should().Be(new DateTime(2000, 1, 3, 0, 0, 0).ToString());
-        //            result[4].Should().Be(new DateTime(2000, 1, 3, 4, 0, 0).ToString());
-        //            result[5].Should().Be(new DateTime(2000, 1, 3, 8, 0, 0).ToString());
-        //            result[6].Should().Be(new DateTime(2000, 1, 5, 0, 0, 0).ToString());
-        //            result[7].Should().Be(new DateTime(2000, 1, 5, 4, 0, 0).ToString());
-        //        }
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Series_First_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.First,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 04, 04, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 07, 04, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs the First Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //        [Fact]
-        //        public void Validate_Next_Execution_Date_Recurring_Every_Hours_All_Days()
-        //        {
-        //            SchedulerConfiguration schedulerConfiguration = new()
-        //            {
-        //                Enabled = true,
-        //                ExecutionType = ExecutionType.Recurring,
-        //                CurrentDate = new DateTime(2000, 1, 1),
-        //                ExecutionDate = new DateTime(2000, 1, 1),
-        //                StartDate = new DateTime(2000, 1, 1),
-        //                EndDate = new DateTime(2000, 1, 1),
-        //                OccursOnce = false,
-        //                OccursEvery = true,
-        //                StartingAt = new DateTime(2000, 1, 1),
-        //                EndAt = new DateTime(2000, 1, 1, 6, 0, 0),
-        //                EveryTimesWeek = 2,
-        //                TimeUnit = TimeUnit.Hours,
-        //                EveryTimes = 4,
-        //                MondayEnabled = true,
-        //                TuesdayEnabled = true,
-        //                WednesdayEnabled = true,
-        //                ThursdayEnabled = true,
-        //                FridayEnabled = true,
-        //                SaturdayEnabled = true,
-        //                SundayEnabled = true
-        //            };
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Second_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Second,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 11, 0, 0, 0));
+            result.Description.Should().Be("Occurs the Second Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
 
-        //            var result = schedulerConfiguration.CalculateSerie(14);
-        //            result[0].Should().Be(new DateTime(2000, 1, 1, 0, 0, 0).ToString());
-        //            result[1].Should().Be(new DateTime(2000, 1, 1, 4, 0, 0).ToString());
-        //            result[2].Should().Be(new DateTime(2000, 1, 2, 0, 0, 0).ToString());
-        //            result[3].Should().Be(new DateTime(2000, 1, 2, 4, 0, 0).ToString());
-        //            result[4].Should().Be(new DateTime(2000, 1, 3, 0, 0, 0).ToString());
-        //            result[5].Should().Be(new DateTime(2000, 1, 3, 4, 0, 0).ToString());
-        //            result[6].Should().Be(new DateTime(2000, 1, 4, 0, 0, 0).ToString());
-        //            result[7].Should().Be(new DateTime(2000, 1, 4, 4, 0, 0).ToString());
-        //            result[8].Should().Be(new DateTime(2000, 1, 5, 0, 0, 0).ToString());
-        //            result[9].Should().Be(new DateTime(2000, 1, 5, 4, 0, 0).ToString());
-        //            result[10].Should().Be(new DateTime(2000, 1, 6, 0, 0, 0).ToString());
-        //            result[11].Should().Be(new DateTime(2000, 1, 6, 4, 0, 0).ToString());
-        //            result[12].Should().Be(new DateTime(2000, 1, 7, 0, 0, 0).ToString());
-        //            result[13].Should().Be(new DateTime(2000, 1, 7, 4, 0, 0).ToString());
-        //        }
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Series_Second_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Second,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 04, 11, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 07, 11, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs the Second Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Third_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Third,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 18, 0, 0, 0));
+            result.Description.Should().Be("Occurs the Third Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Series_Third_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Third,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 04, 18, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 07, 18, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs the Third Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Fourth_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 25, 0, 0, 0));
+            result.Description.Should().Be("Occurs the Fourth Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Series_Fourth_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 04, 25, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 07, 25, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs the Fourth Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Last_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Last,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecution();
+            result.NextExecution.Should().Be(new DateTime(2000, 1, 25, 0, 0, 0));
+            result.Description.Should().Be("Occurs the Last Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Series_Last_Tuesday()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 3, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2000, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 1,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2000, 04, 25, 1, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2000, 07, 25, 2, 0, 0));
+            result[10].Description.Should().Be("Occurs the Fourth Tuesday of every 2 months every 1 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/01/2000 and ending on 01/10/2000.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Series_Last_Tuesday_Change_Year()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Tuesday,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 23, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 26, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Fourth Tuesday of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_First_Day()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Day,
+                OrdinalConfiguration = OrdinalConfiguration.First,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 01, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 01, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the First Day of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Second_Day()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Day,
+                OrdinalConfiguration = OrdinalConfiguration.Second,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 02, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 02, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Second Day of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Third_Day()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Day,
+                OrdinalConfiguration = OrdinalConfiguration.Third,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 03, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 03, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Third Day of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Fourth_First_Day()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Day,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 04, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 04, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Fourth Day of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Last_Day()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Day,
+                OrdinalConfiguration = OrdinalConfiguration.Last,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 31, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 30, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Last Day of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_First_WeekDay()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Weekday,
+                OrdinalConfiguration = OrdinalConfiguration.First,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 01, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 01, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the First Weekday of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Second_WeekDay()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Weekday,
+                OrdinalConfiguration = OrdinalConfiguration.Second,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 02, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 04, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Second Weekday of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Third_WeekDay()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Weekday,
+                OrdinalConfiguration = OrdinalConfiguration.Third,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 03, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 05, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Third Weekday of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Fourth_WeekDay()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Weekday,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 04, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 06, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Fourth Weekday of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Last_WeekDay()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.Weekday,
+                OrdinalConfiguration = OrdinalConfiguration.Last,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 31, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 29, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Last Weekday of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_First_Weekend()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.WeekendDay,
+                OrdinalConfiguration = OrdinalConfiguration.First,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 06, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 02, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the First WeekendDay of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Second_Weekend()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.WeekendDay,
+                OrdinalConfiguration = OrdinalConfiguration.Second,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 13, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 09, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Second WeekendDay of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Third_Weekend()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.WeekendDay,
+                OrdinalConfiguration = OrdinalConfiguration.Third,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 20, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 16, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Third WeekendDay of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Fourth_Weekend()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.WeekendDay,
+                OrdinalConfiguration = OrdinalConfiguration.Fourth,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 27, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 23, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Fourth WeekendDay of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_Hour_Last_Weekend()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2010, 10, 1),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.WeekendDay,
+                OrdinalConfiguration = OrdinalConfiguration.Last,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 27, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 06, 30, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Last WeekendDay of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 01/10/2010.");
+        }
+
+        [Fact]
+        public void Validate_Monthly_Recurring_Description_End_Date()
+        {
+            SchedulerConfiguration schedulerConfiguration = new()
+            {
+                Enabled = true,
+                ExecutionType = ExecutionType.Recurring,
+                CurrentDate = new DateTime(2000, 9, 1),
+                StartTime = new TimeSpan(0, 0, 0),
+                EndTime = new TimeSpan(2, 0, 0),
+                StartDate = new DateTime(2000, 8, 1),
+                EndDate = new DateTime(2001, 01, 27),
+                OccursType = OccursType.Every,
+                TimeUnit = TimeUnit.Hours,
+                TimeUnitFrequency = 2,
+                FrecuencyType = FrecuencyType.Monthly,
+                MonthlyType = MonthlyType.WeeksDay,
+                DayOfWeek = DaysConfiguration.WeekendDay,
+                OrdinalConfiguration = OrdinalConfiguration.Last,
+                EveryMonth = 2
+            };
+            var result = schedulerConfiguration.GetNextExecutionSeries(30);
+            result[10].NextExecution.Should().Be(new DateTime(2001, 01, 27, 0, 0, 0));
+            result[20].NextExecution.Should().Be(new DateTime(2001, 01, 27, 0, 0, 0));
+            result[10].Description.Should().Be("Occurs the Last WeekendDay of every 2 months every 2 " +
+                "Hours between 00:00:00 and 02:00:00 starting on 01/08/2000 and ending on 27/01/2001.");
+        }
     }
 }

@@ -1,5 +1,0 @@
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.Resources.Texts.Global.resources
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.csproj.GenerateResource.cache
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.AssemblyInfoInputs.cache
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\.vs\TimeScheduler\v17\lut\0\i\TimeScheduler\Debug\net5.0\TimeScheduler.AssemblyInfo.cs

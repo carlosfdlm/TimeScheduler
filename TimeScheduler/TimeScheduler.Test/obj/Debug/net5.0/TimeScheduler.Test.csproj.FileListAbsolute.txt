@@ -100,8 +100,6 @@ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeSche
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\bin\Debug\net5.0\TimeScheduler.dll
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\bin\Debug\net5.0\TimeScheduler.pdb
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.csproj.AssemblyReference.cache
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.Resources.Global.resources
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.csproj.GenerateResource.cache
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.AssemblyInfoInputs.cache
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler.Test\obj\Debug\net5.0\TimeScheduler.Test.AssemblyInfo.cs

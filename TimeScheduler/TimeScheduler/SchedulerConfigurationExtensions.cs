@@ -1,379 +1,576 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TimeScheduler.Resources.Texts;
+using TimeScheduler.Resources;
 
 namespace TimeScheduler
 {
     public static class SchedulerConfigurationExtensions
     {
-        public struct ExecutionResult
-        {
-            public DateTime NextExecution;
-            public string Description;
-        }
-
         public static ExecutionResult GetNextExecution(this SchedulerConfiguration schedulerConfiguration)
         {
-            ExecutionResult executionResult = new();
-            ValidateEnabled(schedulerConfiguration);
-            if (schedulerConfiguration.ExecutionType == ExecutionType.Once)
+            Validate(schedulerConfiguration);
+            ExecutionResult executionResult = NextDateResult(schedulerConfiguration, null);
+            return executionResult;
+        }
+
+        public static ExecutionResult[] GetNextExecutionSeries(this SchedulerConfiguration schedulerConfiguration, int numSeries)
+        {
+            Validate(schedulerConfiguration);
+            DateTime? currentDate = null;
+            ExecutionResult[] result = new ExecutionResult[numSeries];
+            for (int i = 0; i < numSeries; i++)
             {
-                executionResult.NextExecution = schedulerConfiguration.ExecutionDate;
-                executionResult.Description = SchedulerDescriptionOnce(schedulerConfiguration);
+                currentDate = GetNewTime(schedulerConfiguration, currentDate);
+                if (currentDate.HasValue &&
+                    currentDate.Value >= schedulerConfiguration.EndDate.ChangeTime(schedulerConfiguration.EndTime))
+                {
+                    currentDate = schedulerConfiguration.EndDate;
+                }
+                result[i] = NextDateResult(schedulerConfiguration, currentDate.Value);
             }
-            else
+            return result;
+        }
+
+        #region private methods
+        private static void Validate(SchedulerConfiguration schedulerConfiguration)
+        {
+            ValidateEnabled(schedulerConfiguration);
+            ValidateCommonDates(schedulerConfiguration);
+            switch (schedulerConfiguration.ExecutionType)
             {
-                ValidateDailyConfiguration(schedulerConfiguration);
-                ValidateMonthlyConfiguration(schedulerConfiguration);
-                executionResult.NextExecution = CalculateNextExecutionDate(schedulerConfiguration);
-                executionResult.Description = SchedulerDescriptionRecurring(schedulerConfiguration);
+                case ExecutionType.Once:
+                    ValidateOnceConfiguration(schedulerConfiguration);
+                    break;
+                case ExecutionType.Recurring:
+                    ValidateRecurringConfiguration(schedulerConfiguration);
+                    break;
+            }
+        }
+
+        private static ExecutionResult NextDateResult(SchedulerConfiguration schedulerConfiguration, DateTime? currentDate)
+        {
+            ExecutionResult executionResult = new();
+            switch (schedulerConfiguration.ExecutionType)
+            {
+                case ExecutionType.Once:
+                    executionResult = CalculateNextDateOnce(schedulerConfiguration);
+                    break;
+                case ExecutionType.Recurring:
+                    executionResult = CalculateNewResult(schedulerConfiguration, currentDate);
+                    break;
             }
             return executionResult;
         }
 
-        private static void ValidateMonthlyConfiguration(SchedulerConfiguration schedulerConfiguration)
+        private static ExecutionResult CalculateNewResult(SchedulerConfiguration schedulerConfiguration, DateTime? currentDate)
         {
-            ValidateMonthlyType(schedulerConfiguration);
-            if (schedulerConfiguration.MonthlyType == MonthlyType.Day)
+            DateTime newDate;
+            if (currentDate == null)
             {
-                ValidateEveryDay(schedulerConfiguration);
-                ValidateEveryMonth(schedulerConfiguration);
+                newDate = CalculateStartDate(schedulerConfiguration);
             }
             else
             {
-                ValidateEveryMonthWeek(schedulerConfiguration);
+                newDate = currentDate.Value;
+            }
+            return new ExecutionResult
+            {
+                NextExecution = newDate,
+                Description = DescriptionManager.GetRecurringDescription(schedulerConfiguration)
+            };
+        }
+
+        private static DateTime CalculateNextDateRecurring(SchedulerConfiguration schedulerConfiguration, DateTime actualDate)
+        {
+            return schedulerConfiguration.FrecuencyType switch
+            {
+                FrecuencyType.Daily => GetDailyResult(schedulerConfiguration, actualDate),
+                FrecuencyType.Weekly => CalculateNextDayWeek(schedulerConfiguration, actualDate),
+                FrecuencyType.Monthly => OrdinalDate(schedulerConfiguration, actualDate, 1),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private static DateTime OrdinalDate(SchedulerConfiguration schedulerConfiguration, DateTime currentDate, int month)
+        {
+            DateTime date = GetDateToStart(currentDate, month);
+            int position = (int)schedulerConfiguration.OrdinalConfiguration;
+            if ((int)schedulerConfiguration.DayOfWeek < 7)
+            {
+                if (schedulerConfiguration.OrdinalConfiguration == OrdinalConfiguration.Last)
+                {
+                    position = GetLastDay(schedulerConfiguration, currentDate);
+                }
+                return NewMonthNormalDay(date, schedulerConfiguration, currentDate, position).ChangeTime(schedulerConfiguration.StartTime);
+            }
+            else
+            {
+                return CalculateNewMonthDate(date, schedulerConfiguration, currentDate).ChangeTime(schedulerConfiguration.StartTime);
             }
         }
 
-        private static void ValidateEveryMonthWeek(SchedulerConfiguration schedulerConfiguration)
+        private static DateTime CalculateNewMonthDate(DateTime date, SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
         {
-            if (schedulerConfiguration.EveryMonthDay < 0)
+            return (int)schedulerConfiguration.DayOfWeek switch
             {
-                throw new TimeSchedulerException("Every months is negative.");
+                7 => FoundNewDay(date, schedulerConfiguration),
+                8 => FoundWeekDay(date, schedulerConfiguration, currentDate),
+                9 => FoundWeekendDay(date, schedulerConfiguration, currentDate),
+                _ => throw new TimeSchedulerException()
+            };
+        }
+
+        private static DateTime FoundNewDay(DateTime date, SchedulerConfiguration schedulerConfiguration)
+        {
+            int ordinal = 0;
+            int position = (int)schedulerConfiguration.OrdinalConfiguration;
+            if (schedulerConfiguration.OrdinalConfiguration == OrdinalConfiguration.Last)
+            {
+                position = DateTime.DaysInMonth(date.Year, date.Month);
             }
-            if (schedulerConfiguration.EveryMonthDay == 0)
+            for (int i = 0; i < DateTime.DaysInMonth(date.Year, date.Month); i++)
             {
-                throw new TimeSchedulerException("Every months is zero.");
+                ordinal++;
+                if (position == ordinal)
+                {
+                    return date.ChangeTime(schedulerConfiguration.StartTime);
+                }
+                date = date.AddDays(1);
+            }
+            return date;
+        }
+
+        private static DateTime FoundWeekendDay(DateTime date, SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
+        {
+            int ordinal = 0;
+            int position = (int)schedulerConfiguration.OrdinalConfiguration;
+            if (schedulerConfiguration.OrdinalConfiguration == OrdinalConfiguration.Last)
+            {
+                return GetLastWeekendDay(date, schedulerConfiguration);
+            }
+            for (int i = 0; i < DateTime.DaysInMonth(currentDate.Year, currentDate.Month); i++)
+            {
+                int addDays = 1;
+                if ((int)date.DayOfWeek == 0 ||
+                    (int)date.DayOfWeek == 6)
+                {
+                    ordinal++;
+                    if ((int)date.DayOfWeek == 6)
+                    {
+                        addDays = 2;
+                    }                    
+                    if (position == ordinal)
+                    {
+                        return date.ChangeTime(schedulerConfiguration.StartTime);
+                    }
+                }
+                date = date.AddDays(addDays);
+            }
+            return date;
+        }
+
+        private static DateTime GetLastWeekendDay(DateTime date, SchedulerConfiguration schedulerConfiguration)
+        {
+            DateTime newDate = new(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+            for (int i = DateTime.DaysInMonth(date.Year, date.Month); i > 1; i--)
+            {
+                if ((int)newDate.DayOfWeek == 0 ||
+                    (int)newDate.DayOfWeek == 6)
+                {
+                    if ((int)newDate.DayOfWeek == 0)
+                    {
+                        return newDate.ChangeTime(schedulerConfiguration.StartTime).AddDays(-1);
+                    }
+                    else
+                    {
+                        return newDate.ChangeTime(schedulerConfiguration.StartTime);
+                    }
+                }
+                newDate = newDate.AddDays(-1);
+            }
+            return newDate;
+        }
+
+        private static DateTime FoundWeekDay(DateTime date, SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
+        {
+            int ordinal = 0;
+            int position = (int)schedulerConfiguration.OrdinalConfiguration;
+            if (schedulerConfiguration.OrdinalConfiguration == OrdinalConfiguration.Last)
+            {
+                return GetLastWeekDay(date, schedulerConfiguration);
+            }
+            else
+            {
+                for (int i = 0; i < DateTime.DaysInMonth(currentDate.Year, currentDate.Month); i++)
+                {
+                    if ((int)date.DayOfWeek != 0 &&
+                        (int)date.DayOfWeek != 6)
+                    {
+                        ordinal++;
+                        if (position == ordinal)
+                        {
+                            return date.ChangeTime(schedulerConfiguration.StartTime);
+                        }
+                    }
+                    date = date.AddDays(1);
+                }
+            }
+            return date;
+        }
+
+        private static DateTime GetLastWeekDay(DateTime date, SchedulerConfiguration schedulerConfiguration)
+        {
+            DateTime newDate = new(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+            for (int i = DateTime.DaysInMonth(date.Year, date.Month); i > 1; i--)
+            {
+                if ((int)newDate.DayOfWeek != 0 &&
+                    (int)newDate.DayOfWeek != 6)
+                {
+                    return newDate.ChangeTime(schedulerConfiguration.StartTime);
+                }
+                newDate = newDate.AddDays(-1);
+            }
+            return newDate;
+        }
+
+        private static DateTime NewMonthNormalDay(DateTime date, SchedulerConfiguration schedulerConfiguration, DateTime currentDate, int position)
+        {
+            int ordinal = 0;
+            for (int i = 0; i < DateTime.DaysInMonth(currentDate.Year, currentDate.Month); i++)
+            {
+                if ((int)date.DayOfWeek == (int)schedulerConfiguration.DayOfWeek)
+                {
+                    ordinal++;
+                    if (position == ordinal)
+                    {
+                        return date.ChangeTime(schedulerConfiguration.StartTime);
+                    }
+                }
+                date = date.AddDays(1);
+            }
+            return date;
+        }
+
+        private static DateTime GetDateToStart(DateTime currentDate, int month)
+        {
+            DateTime startDate;
+            if (month == 0)
+            {
+                startDate = new(currentDate.Year, currentDate.Month, 1);
+            }
+            else
+            {
+                if (currentDate.Month + 1 > 12)
+                {
+                    startDate = new(currentDate.Year + 1, 1, 1);
+                }
+                else
+                {
+                    startDate = new(currentDate.Year, currentDate.Month + 1, 1);
+                }
+            }
+            return startDate;
+        }
+
+        private static int GetLastDay(SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
+        {
+            DateTime newDate = new(currentDate.Year, currentDate.Month, 1);
+            int ordinal = 0;
+            for (int h = 0; h < DateTime.DaysInMonth(currentDate.Year, currentDate.Month); h++)
+            {
+                if ((int)newDate.DayOfWeek == (int)schedulerConfiguration.DayOfWeek)
+                {
+                    ordinal++;
+                }
+                newDate = newDate.AddDays(1);
+            }
+            return ordinal;
+        }
+
+        private static DateTime GetNewTime(SchedulerConfiguration schedulerConfiguration, DateTime? currentDate)
+        {
+            return currentDate == null
+            ? CalculateStartDate(schedulerConfiguration)
+            : schedulerConfiguration.TimeUnit switch
+            {
+                TimeUnit.Seconds => NextDateSeconds(schedulerConfiguration, currentDate.Value),
+                TimeUnit.Minutes => NextDateMinutes(schedulerConfiguration, currentDate.Value),
+                TimeUnit.Hours => NextDateHours(schedulerConfiguration, currentDate.Value),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private static DateTime CalculateStartDate(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (schedulerConfiguration.FrecuencyType == FrecuencyType.Weekly)
+            {
+                return CalculateNextDayWeek(schedulerConfiguration, schedulerConfiguration.StartDate);
+            }
+            if (schedulerConfiguration.FrecuencyType == FrecuencyType.Monthly)
+            {
+                return OrdinalDate(schedulerConfiguration, schedulerConfiguration.StartDate, 0);
+            }
+            else
+            {
+                return schedulerConfiguration.StartDate.ChangeTime(schedulerConfiguration.StartTime);
+            }
+        }
+
+        private static DateTime NextDateMinutes(SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
+        {
+            DateTime dateTime;
+            if (currentDate.AddMinutes(schedulerConfiguration.TimeUnitFrequency) > currentDate.ChangeTime(schedulerConfiguration.EndTime))
+            {
+                dateTime = CalculateNextDateRecurring(schedulerConfiguration, currentDate).ChangeTime(schedulerConfiguration.StartTime);
+            }
+            else
+            {
+                dateTime = currentDate.AddMinutes(schedulerConfiguration.TimeUnitFrequency);
+            }
+            return dateTime;
+        }
+
+        private static DateTime NextDateSeconds(SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
+        {
+            DateTime dateTime;
+            if (currentDate.AddSeconds(schedulerConfiguration.TimeUnitFrequency) > currentDate.ChangeTime(schedulerConfiguration.EndTime))
+            {
+                dateTime = CalculateNextDateRecurring(schedulerConfiguration, currentDate).ChangeTime(schedulerConfiguration.StartTime);
+            }
+            else
+            {
+                dateTime = currentDate.AddSeconds(schedulerConfiguration.TimeUnitFrequency);
+            }
+            return dateTime;
+        }
+
+        private static DateTime NextDateHours(SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
+        {
+            DateTime dateTime;
+            if (currentDate.AddHours(schedulerConfiguration.TimeUnitFrequency) > currentDate.ChangeTime(schedulerConfiguration.EndTime))
+            {
+                dateTime = CalculateNextDateRecurring(schedulerConfiguration, currentDate).ChangeTime(schedulerConfiguration.StartTime);
+            }
+            else
+            {
+                dateTime = currentDate.AddHours(schedulerConfiguration.TimeUnitFrequency);
+            }
+            return dateTime;
+        }
+
+        private static DateTime GetDailyResult(SchedulerConfiguration schedulerConfiguration, DateTime actualDate)
+        {
+            return actualDate.AddDays(schedulerConfiguration.FrequencyDays);
+        }
+
+        private static ExecutionResult CalculateNextDateOnce(SchedulerConfiguration schedulerConfiguration)
+        {
+            return new ExecutionResult()
+            {
+                NextExecution = schedulerConfiguration.OnceDateTime,
+                Description = DescriptionManager.GetOnceDescription(schedulerConfiguration)
+            };
+        }
+
+        private static void ValidateCommonDates(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (schedulerConfiguration.EndDate < schedulerConfiguration.StartDate)
+            {
+                throw new TimeSchedulerException(Global.EndDateIsLessThanStartDate);
+            }
+            if (schedulerConfiguration.CurrentDate < schedulerConfiguration.StartDate ||
+                schedulerConfiguration.CurrentDate > schedulerConfiguration.EndDate)
+            {
+                throw new TimeSchedulerException(Global.CurrentDateOutOfRange);
+            }
+        }
+
+        private static void ValidateRecurringConfiguration(SchedulerConfiguration schedulerConfiguration)
+        {
+            ValidateDailyFrequency(schedulerConfiguration);
+            if (schedulerConfiguration.FrecuencyType == FrecuencyType.Daily)
+            {
+                ValidateDaysFrequency(schedulerConfiguration);
+                ValidateDailyMaxDate(schedulerConfiguration);
+            }
+            if (schedulerConfiguration.FrecuencyType == FrecuencyType.Weekly)
+            {
+                ValidateWeeklyFrequency(schedulerConfiguration);
+            }
+            if (schedulerConfiguration.FrecuencyType == FrecuencyType.Monthly)
+            {
+                ValidateMonthlyFrequency(schedulerConfiguration);
+            }
+        }
+
+        private static void ValidateDailyMaxDate(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (DateTime.MaxValue.Subtract(schedulerConfiguration.CurrentDate).Days < schedulerConfiguration.FrequencyDays)
+            {
+                throw new TimeSchedulerException(Global.TheDateCannotBeRepresented);
+            }
+        }
+
+        private static void ValidateDaysFrequency(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (schedulerConfiguration.FrequencyDays == 0)
+            {
+                throw new TimeSchedulerException(Global.FrequencyDaysIsZero);
+            }
+            if (schedulerConfiguration.FrequencyDays < 0)
+            {
+                throw new TimeSchedulerException(Global.FrequencyDaysIsNegative);
+            }
+        }
+
+        private static void ValidateMonthlyFrequency(SchedulerConfiguration schedulerConfiguration)
+        {
+            ValidateEveryMonth(schedulerConfiguration);
+            if (schedulerConfiguration.MonthlyType == MonthlyType.Day)
+            {
+                ValidateDayOfMonth(schedulerConfiguration);
+            }
+        }
+
+        private static void ValidateDayOfMonth(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (schedulerConfiguration.DayOfMonth == 0)
+            {
+                throw new TimeSchedulerException(Global.MonthDayIsZero);
+            }
+            if (schedulerConfiguration.DayOfMonth < 0)
+            {
+                throw new TimeSchedulerException(Global.MonthDayIsNegative);
             }
         }
 
         private static void ValidateEveryMonth(SchedulerConfiguration schedulerConfiguration)
         {
-            if(schedulerConfiguration.MonthsDay < 0)
+            if (schedulerConfiguration.EveryMonth == 0)
             {
-                throw new TimeSchedulerException("Every months is negative.");
+                throw new TimeSchedulerException(Global.EveryMonthIsZero);
             }
-            if(schedulerConfiguration.MonthsDay == 0)
+            if (schedulerConfiguration.EveryMonth < 0)
             {
-                throw new TimeSchedulerException("Every months is zero.");
-            }
-        }
-
-        private static void ValidateEveryDay(SchedulerConfiguration schedulerConfiguration)
-        {
-            if(schedulerConfiguration.EveryMonthDay < 0)
-            {
-                throw new TimeSchedulerException("Every month day can't be negative.");
-            }
-            if (schedulerConfiguration.EveryMonthDay == 0)
-            {
-                throw new TimeSchedulerException("Every month day can't be zero.");
-            }
-            if(schedulerConfiguration.EveryMonthDay > 31)
-            {
-                throw new TimeSchedulerException("Every month day out of range.");
+                throw new TimeSchedulerException(Global.EveryMonthIsNegative);
             }
         }
 
-        private static void ValidateMonthlyType(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateWeeklyFrequency(SchedulerConfiguration schedulerConfiguration)
         {
-            if (schedulerConfiguration.DaySelector &&
-                schedulerConfiguration.WeekDaySelector)
+            ValidateWeekFrequency(schedulerConfiguration);
+            ValidateWeekDays(schedulerConfiguration);
+        }
+
+        private static void ValidateWeekFrequency(SchedulerConfiguration schedulerConfiguration)
+        {
+            if (schedulerConfiguration.WeekFrequency == 0)
             {
-                throw new TimeSchedulerException("Monthly type is true two times.");
+                throw new TimeSchedulerException(Global.TheWeekFrequencyIsZero);
             }
-            if (schedulerConfiguration.DaySelector == false &&
-               schedulerConfiguration.WeekDaySelector == false)
+            if (schedulerConfiguration.WeekFrequency < 0)
             {
-                throw new TimeSchedulerException("Monthly type is false two times.");
-            }
-            if (schedulerConfiguration.WeekDaySelector)
-            {
-                schedulerConfiguration.MonthlyType = MonthlyType.WeeksDay;
-            }
-            else
-            {
-                schedulerConfiguration.MonthlyType = MonthlyType.Day;
+                throw new TimeSchedulerException(Global.TheWeekFrequencyIsNegative);
             }
         }
 
-        public static ExecutionResult[] CalculateSerie(this SchedulerConfiguration schedulerConfiguration, int numSeries)
+        private static void ValidateDailyFrequency(SchedulerConfiguration schedulerConfiguration)
         {
-            ValidateDailyConfiguration(schedulerConfiguration);
-            ValidateMonthlyType(schedulerConfiguration);
-            if (schedulerConfiguration.MonthlyType == MonthlyType.Day)
+            if (schedulerConfiguration.StartTime > schedulerConfiguration.EndTime)
             {
-                ValidateEveryDay(schedulerConfiguration);
-                ValidateEveryMonth(schedulerConfiguration);
+                throw new TimeSchedulerException(Global.EndTimeIsLessThanStartDate);
             }
-            else
+            if (schedulerConfiguration.OccursType == OccursType.Once)
             {
-                ValidateEveryMonthWeek(schedulerConfiguration);
+                if (schedulerConfiguration.OccursOnceTime < schedulerConfiguration.StartTime ||
+                schedulerConfiguration.OccursOnceTime > schedulerConfiguration.EndTime)
+                {
+                    throw new TimeSchedulerException(Global.OccursOnceTimeIsOutOfRange);
+                }
             }
-            ExecutionResult[] result = new ExecutionResult[numSeries];
-            DateTime currentTime = schedulerConfiguration.StartingAt;
-            for (int i = 0; i < numSeries; i++)
+            if (schedulerConfiguration.OccursType == OccursType.Every)
             {
-                result[i].NextExecution = currentTime;
-                result[i].Description = SchedulerDescriptionRecurring(schedulerConfiguration);
-                currentTime = CalculateNextDate(schedulerConfiguration, currentTime);
+                if (schedulerConfiguration.TimeUnitFrequency == 0)
+                {
+                    throw new TimeSchedulerException(Global.TheNumberOfTimeUnitIsZero);
+                }
+                if (schedulerConfiguration.TimeUnitFrequency < 0)
+                {
+                    throw new TimeSchedulerException(Global.TheNumberOfTimeUnitIsNegative);
+                }
             }
-            return result;
         }
 
-
-        #region private methods
-        private static void ValidateDailyConfiguration(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateOnceConfiguration(SchedulerConfiguration schedulerConfiguration)
         {
-            schedulerConfiguration.OccursType = ValidateOccursType(schedulerConfiguration);
-            ValidateOccurs(schedulerConfiguration);
+            if (schedulerConfiguration.OnceDateTime < schedulerConfiguration.CurrentDate)
+            {
+                throw new TimeSchedulerException(Global.OnceDateTimeLessThanCurrentDate);
+            }
         }
 
-        private static DateTime CalculateNextDate(SchedulerConfiguration schedulerConfiguration, DateTime currentTime)
+        private static DateTime CalculateNextDayWeek(SchedulerConfiguration schedulerConfiguration, DateTime currentDate)
         {
-            if (schedulerConfiguration.TimeUnit == TimeUnit.Seconds)
+            bool[] weekDays = AddWeekDays(schedulerConfiguration);
+            return currentDate.DayOfWeek switch
             {
-                return NextDateSeconds(schedulerConfiguration, currentTime);
-            }
-            if (schedulerConfiguration.TimeUnit == TimeUnit.Minutes)
-            {
-                return NextDateMinutes(schedulerConfiguration, currentTime);
-            }
-            if (schedulerConfiguration.TimeUnit == TimeUnit.Hours)
-            {
-                return NextDateHours(schedulerConfiguration, currentTime);
-            }
-            return currentTime;
+                DayOfWeek.Monday => NewDay(1, weekDays, currentDate),
+                DayOfWeek.Tuesday => NewDay(2, weekDays, currentDate),
+                DayOfWeek.Wednesday => NewDay(3, weekDays, currentDate),
+                DayOfWeek.Thursday => NewDay(4, weekDays, currentDate),
+                DayOfWeek.Friday => NewDay(5, weekDays, currentDate),
+                DayOfWeek.Saturday => NewDay(6, weekDays, currentDate),
+                DayOfWeek.Sunday => NewDay(0, weekDays, currentDate),
+                _ => throw new NotImplementedException()
+            };
         }
 
-        //private static DateTime NextDateHours(SchedulerConfiguration schedulerConfiguration, DateTime currentTime)
-        //{
-        //    if (currentTime.AddHours(schedulerConfiguration.EveryTimes).TimeOfDay > schedulerConfiguration.EndAt.TimeOfDay)
-        //    {
-        //        int daysDiff = CalculateNextDayWeek(schedulerConfiguration, currentTime) + (currentTime.Day - schedulerConfiguration.StartingAt.Day);
-        //        double secondsDiff = currentTime.AddHours(schedulerConfiguration.EveryTimes).TimeOfDay.Subtract(schedulerConfiguration.EndAt.TimeOfDay).Seconds;
-        //        return schedulerConfiguration.StartingAt.AddSeconds(secondsDiff).AddDays(daysDiff);
-        //    }
-        //    else
-        //    {
-        //        return currentTime.AddHours(schedulerConfiguration.EveryTimes);
-        //    }
-        //}
-
-        //private static DateTime NextDateMinutes(SchedulerConfiguration schedulerConfiguration, DateTime currentTime)
-        //{
-        //    if (currentTime.AddMinutes(schedulerConfiguration.EveryTimes).TimeOfDay > schedulerConfiguration.EndAt.TimeOfDay)
-        //    {
-        //        int daysDiff = CalculateNextDayWeek(schedulerConfiguration, currentTime) + (currentTime.Day - schedulerConfiguration.StartingAt.Day);
-        //        int secondsDiff = currentTime.AddMinutes(schedulerConfiguration.EveryTimes).TimeOfDay.Subtract(schedulerConfiguration.EndAt.TimeOfDay).Seconds;
-        //        return schedulerConfiguration.StartingAt.AddSeconds(secondsDiff).AddDays(daysDiff);
-        //    }
-        //    else
-        //    {
-        //        return currentTime.AddMinutes(schedulerConfiguration.EveryTimes);
-        //    }
-        //}
-
-        //private static DateTime NextDateSeconds(SchedulerConfiguration schedulerConfiguration, DateTime currentTime)
-        //{
-        //    if (currentTime.AddSeconds(schedulerConfiguration.EveryTimes).TimeOfDay > schedulerConfiguration.EndAt.TimeOfDay)
-        //    {
-        //        int daysDiff = CalculateNextDayWeek(schedulerConfiguration, currentTime) + (currentTime.Day - schedulerConfiguration.StartingAt.Day);
-        //        int secondsDiff = currentTime.AddSeconds(schedulerConfiguration.EveryTimes).TimeOfDay.Subtract(schedulerConfiguration.EndAt.TimeOfDay).Seconds;
-        //        return schedulerConfiguration.StartingAt.AddSeconds(secondsDiff).AddDays(daysDiff);
-        //    }
-        //    else
-        //    {
-        //        return currentTime.AddSeconds(schedulerConfiguration.EveryTimes);
-        //    }
-        //}
-
-        //private static int CalculateNextDayWeek(SchedulerConfiguration schedulerConfiguration, DateTime currentTime)
-        //{
-        //    bool[] weekDays = AddWeekDays(schedulerConfiguration);
-        //    return currentTime.DayOfWeek switch
-        //    {
-        //        DayOfWeek.Monday => NewDay(0, weekDays),
-        //        DayOfWeek.Tuesday => NewDay(1, weekDays),
-        //        DayOfWeek.Wednesday => NewDay(2, weekDays),
-        //        DayOfWeek.Thursday => NewDay(3, weekDays),
-        //        DayOfWeek.Friday => NewDay(4, weekDays),
-        //        DayOfWeek.Saturday => NewDay(5, weekDays),
-        //        DayOfWeek.Sunday => NewDay(6, weekDays),
-        //        _ => throw new NotImplementedException()
-        //    };
-        //}
-
-        private static int NewDay(int numDay, bool[] weekDays)
+        private static DateTime NewDay(int numDay, bool[] weekDays, DateTime currentdate)
         {
-            int newDay = 0;
-            for (int i = numDay + 1; i < weekDays.Length; i++)
+            int newDayPosition = 0;
+            DateTime NewDay = currentdate;
+            for (int i = numDay; i < weekDays.Length; i++)
             {
-                newDay++;
+                newDayPosition++;
                 if (weekDays[i])
                 {
-                    return newDay;
+                    return NewDay.AddDays(newDayPosition);
                 }
             }
             for (int i = 0; i < numDay; i++)
             {
-                newDay++;
+                newDayPosition++;
                 if (weekDays[i])
                 {
-                    return newDay;
+                    return NewDay.AddDays(newDayPosition);
                 }
             }
-            return newDay;
+            return NewDay;
         }
 
-        //private static bool[] AddWeekDays(SchedulerConfiguration schedulerConfiguration)
-        //{
-        //    bool[] weekDays = new bool[7];
-        //    weekDays[0] = schedulerConfiguration.MondayEnabled;
-        //    weekDays[1] = schedulerConfiguration.TuesdayEnabled;
-        //    weekDays[2] = schedulerConfiguration.WednesdayEnabled;
-        //    weekDays[3] = schedulerConfiguration.ThursdayEnabled;
-        //    weekDays[4] = schedulerConfiguration.FridayEnabled;
-        //    weekDays[5] = schedulerConfiguration.SaturdayEnabled;
-        //    weekDays[6] = schedulerConfiguration.SundayEnabled;
-        //    return weekDays;
-        //}
-
-        private static OccursType ValidateOccursType(SchedulerConfiguration schedulerConfiguration)
+        private static bool[] AddWeekDays(SchedulerConfiguration schedulerConfiguration)
         {
-            if (schedulerConfiguration.OccursOnce &&
-                schedulerConfiguration.OccursEvery)
-            {
-                throw new TimeSchedulerException("Occurs is true two times.");
-            }
-            if (schedulerConfiguration.OccursOnce == false &&
-               schedulerConfiguration.OccursEvery == false)
-            {
-                throw new TimeSchedulerException("Occurs is false two times.");
-            }
-            return schedulerConfiguration.OccursOnce == false &&
-                schedulerConfiguration.OccursEvery
-                ? OccursType.Every
-                : OccursType.Once;
-        }
-        private static void ValidateOccurs(SchedulerConfiguration schedulerConfiguration)
-        {
-            if (schedulerConfiguration.OccursType == OccursType.Every)
-            {
-                ValidateOccursEveryTimes(schedulerConfiguration.EveryTimes);
-            }
-        }
-        //private static void ValidateWeeklyConfiguration(SchedulerConfiguration schedulerConfiguration)
-        //{
-        //    ValidateEveryWeekly(schedulerConfiguration.EveryTimesWeek);
-        //    ValidateDays(schedulerConfiguration);
-        //}
-
-        private static void ValidateEveryWeekly(int? everyTimesweek)
-        {
-            if (everyTimesweek == 0)
-            {
-                throw new TimeSchedulerException("Every times week is zero.");
-            }
-            if (everyTimesweek.Value < 0)
-            {
-                throw new TimeSchedulerException("Every times week is negative.");
-            }
+            bool[] weekDays = new bool[7];
+            weekDays[0] = schedulerConfiguration.MondayEnabled;
+            weekDays[1] = schedulerConfiguration.TuesdayEnabled;
+            weekDays[2] = schedulerConfiguration.WednesdayEnabled;
+            weekDays[3] = schedulerConfiguration.ThursdayEnabled;
+            weekDays[4] = schedulerConfiguration.FridayEnabled;
+            weekDays[5] = schedulerConfiguration.SaturdayEnabled;
+            weekDays[6] = schedulerConfiguration.SundayEnabled;
+            return weekDays;
         }
 
-        //private static void ValidateDays(SchedulerConfiguration schedulerConfiguration)
-        //{
-        //    if (schedulerConfiguration.MondayEnabled == false &&
-        //        schedulerConfiguration.TuesdayEnabled == false &&
-        //        schedulerConfiguration.WednesdayEnabled == false &&
-        //        schedulerConfiguration.ThursdayEnabled == false &&
-        //        schedulerConfiguration.FridayEnabled == false &&
-        //        schedulerConfiguration.SaturdayEnabled == false &&
-        //        schedulerConfiguration.SundayEnabled == false)
-        //    {
-        //        throw new TimeSchedulerException("No week days selected.");
-        //    }
-        //}
-
-        private static string GetDescriptionType(SchedulerConfiguration schedulerConfiguration)
+        private static void ValidateWeekDays(SchedulerConfiguration schedulerConfiguration)
         {
-            if (schedulerConfiguration.OccursType == OccursType.Every)
+            if (schedulerConfiguration.MondayEnabled == false &&
+                schedulerConfiguration.TuesdayEnabled == false &&
+                schedulerConfiguration.WednesdayEnabled == false &&
+                schedulerConfiguration.ThursdayEnabled == false &&
+                schedulerConfiguration.FridayEnabled == false &&
+                schedulerConfiguration.SaturdayEnabled == false &&
+                schedulerConfiguration.SundayEnabled == false)
             {
-                return "every " + schedulerConfiguration.EveryTimes.ToString() + " " + schedulerConfiguration.TimeUnit.ToString().ToLower();
-            }
-            else
-            {
-                return "once at " + schedulerConfiguration.OccursOnceTime.ToShortTimeString();
-            }
-        }
-
-        //private static string WeekDaysMsg(SchedulerConfiguration schedulerConfiguration)
-        //{
-        //    List<string> weekDaysStr = new();
-        //    if (schedulerConfiguration.MondayEnabled)
-        //    {
-        //        weekDaysStr.Add("monday");
-        //    }
-        //    if (schedulerConfiguration.TuesdayEnabled)
-        //    {
-        //        weekDaysStr.Add("tuesday");
-        //    }
-        //    if (schedulerConfiguration.WednesdayEnabled)
-        //    {
-        //        weekDaysStr.Add("wednesday");
-        //    }
-        //    if (schedulerConfiguration.ThursdayEnabled)
-        //    {
-        //        weekDaysStr.Add("thursday");
-        //    }
-        //    if (schedulerConfiguration.FridayEnabled)
-        //    {
-        //        weekDaysStr.Add("friday");
-        //    }
-        //    if (schedulerConfiguration.SaturdayEnabled)
-        //    {
-        //        weekDaysStr.Add("saturday");
-        //    }
-        //    if (schedulerConfiguration.SundayEnabled)
-        //    {
-        //        weekDaysStr.Add("sunday");
-        //    }
-        //    StringBuilder weekDaysMsg = new();
-        //    for (int i = 0; i < weekDaysStr.Count; i++)
-        //    {
-        //        weekDaysMsg.Append(weekDaysStr[i]);
-        //        if (i + 1 == weekDaysStr.Count - 1)
-        //        {
-        //            weekDaysMsg.Append(" and ");
-        //        }
-        //        if (i + 1 <= weekDaysStr.Count - 2)
-        //        {
-        //            weekDaysMsg.Append(", ");
-        //        }
-        //    }
-        //    return weekDaysMsg.ToString();
-        //}
-
-        private static void ValidateOccursEveryTimes(int? everyTimes)
-        {
-            if (everyTimes == 0)
-            {
-                throw new TimeSchedulerException("Occurs every times is zero.");
-            }
-            if (everyTimes.Value < 0)
-            {
-                throw new TimeSchedulerException("Occurs every times is negative.");
+                throw new TimeSchedulerException(Global.NoWeekDaysSelected);
             }
         }
 
@@ -381,34 +578,9 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.Enabled == false)
             {
-                throw new TimeSchedulerException("Enabled is false.");
+                throw new TimeSchedulerException(Global.EnabledIsFalse);
             }
         }
-
-        private static string SchedulerDescriptionOnce(SchedulerConfiguration schedulerConfiguration)
-        {
-            return string.Format(
-                Global.ExecutionDescription,
-                "Once",
-                schedulerConfiguration.ExecutionDate.ToShortDateString(),
-                schedulerConfiguration.ExecutionDate.ToShortTimeString(),
-                schedulerConfiguration.StartDate,
-                schedulerConfiguration.EndDate);
-        }
-
-        private static string SchedulerDescriptionRecurring(SchedulerConfiguration schedulerConfiguration)
-        {
-            return string.Format("Occurs the {0} {1} of every {3} months.",
-                schedulerConfiguration.ExecutionType.ToString(),
-                schedulerConfiguration.FrecuencyType.ToString(),
-                schedulerConfiguration.EveryMonthDay);
-        }
-
-        private static DateTime CalculateNextExecutionDate(SchedulerConfiguration schedulerConfiguration)
-        {
-            return schedulerConfiguration.CurrentDate;
-        }
-
         #endregion private methods
     }
 }
