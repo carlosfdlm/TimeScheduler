@@ -7,6 +7,7 @@ namespace TimeScheduler
     {
         public static ExecutionResult GetNextExecution(this SchedulerConfiguration schedulerConfiguration)
         {
+            InitializeResources(schedulerConfiguration);
             Validate(schedulerConfiguration);
             ExecutionResult executionResult = NextDateResult(schedulerConfiguration, null);
             return executionResult;
@@ -14,6 +15,7 @@ namespace TimeScheduler
 
         public static ExecutionResult[] GetNextExecutionSeries(this SchedulerConfiguration schedulerConfiguration, int numSeries)
         {
+            InitializeResources(schedulerConfiguration);
             Validate(schedulerConfiguration);
             DateTime? currentDate = null;
             ExecutionResult[] result = new ExecutionResult[numSeries];
@@ -59,6 +61,11 @@ namespace TimeScheduler
                     break;
             }
             return executionResult;
+        }
+
+        private static void InitializeResources(SchedulerConfiguration schedulerConfiguration)
+        {
+            SchedulerResourceManager.Initialize(schedulerConfiguration);
         }
 
         private static ExecutionResult CalculateNewResult(SchedulerConfiguration schedulerConfiguration, DateTime? currentDate)
@@ -375,12 +382,12 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.EndDate < schedulerConfiguration.StartDate)
             {
-                throw new TimeSchedulerException(Global.EndDateIsLessThanStartDate);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("EndDateIsLessThanStartDate"));
             }
             if (schedulerConfiguration.CurrentDate < schedulerConfiguration.StartDate ||
                 schedulerConfiguration.CurrentDate > schedulerConfiguration.EndDate)
             {
-                throw new TimeSchedulerException(Global.CurrentDateOutOfRange);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("CurrentDateOutOfRange"));
             }
         }
 
@@ -406,7 +413,7 @@ namespace TimeScheduler
         {
             if (DateTime.MaxValue.Subtract(schedulerConfiguration.CurrentDate).Days < schedulerConfiguration.FrequencyDays)
             {
-                throw new TimeSchedulerException(Global.TheDateCannotBeRepresented);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("TheDateCannotBeRepresented"));
             }
         }
 
@@ -414,11 +421,11 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.FrequencyDays == 0)
             {
-                throw new TimeSchedulerException(Global.FrequencyDaysIsZero);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("FrequencyDaysIsZero"));
             }
             if (schedulerConfiguration.FrequencyDays < 0)
             {
-                throw new TimeSchedulerException(Global.FrequencyDaysIsNegative);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("FrequencyDaysIsNegative"));
             }
         }
 
@@ -435,11 +442,11 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.DayOfMonth == 0)
             {
-                throw new TimeSchedulerException(Global.MonthDayIsZero);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("MonthDayIsZero"));
             }
             if (schedulerConfiguration.DayOfMonth < 0)
             {
-                throw new TimeSchedulerException(Global.MonthDayIsNegative);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("MonthDayIsNegative"));
             }
         }
 
@@ -447,11 +454,11 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.EveryMonth == 0)
             {
-                throw new TimeSchedulerException(Global.EveryMonthIsZero);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("EveryMonthIsZero"));
             }
             if (schedulerConfiguration.EveryMonth < 0)
             {
-                throw new TimeSchedulerException(Global.EveryMonthIsNegative);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("EveryMonthIsNegative"));
             }
         }
 
@@ -465,11 +472,11 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.WeekFrequency == 0)
             {
-                throw new TimeSchedulerException(Global.TheWeekFrequencyIsZero);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("TheWeekFrequencyIsZero"));
             }
             if (schedulerConfiguration.WeekFrequency < 0)
             {
-                throw new TimeSchedulerException(Global.TheWeekFrequencyIsNegative);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("TheWeekFrequencyIsNegative"));
             }
         }
 
@@ -477,25 +484,25 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.StartTime > schedulerConfiguration.EndTime)
             {
-                throw new TimeSchedulerException(Global.EndTimeIsLessThanStartDate);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("EndTimeIsLessThanStartTime"));
             }
             if (schedulerConfiguration.OccursType == OccursType.Once)
             {
                 if (schedulerConfiguration.OccursOnceTime < schedulerConfiguration.StartTime ||
                 schedulerConfiguration.OccursOnceTime > schedulerConfiguration.EndTime)
                 {
-                    throw new TimeSchedulerException(Global.OccursOnceTimeIsOutOfRange);
+                    throw new TimeSchedulerException(SchedulerResourceManager.GetResource("OccursOnceTimeIsOutOfRange"));
                 }
             }
             if (schedulerConfiguration.OccursType == OccursType.Every)
             {
                 if (schedulerConfiguration.TimeUnitFrequency == 0)
                 {
-                    throw new TimeSchedulerException(Global.TheNumberOfTimeUnitIsZero);
+                    throw new TimeSchedulerException(SchedulerResourceManager.GetResource("TheNumberOfTimeUnitIsZero"));
                 }
                 if (schedulerConfiguration.TimeUnitFrequency < 0)
                 {
-                    throw new TimeSchedulerException(Global.TheNumberOfTimeUnitIsNegative);
+                    throw new TimeSchedulerException(SchedulerResourceManager.GetResource("TheNumberOfTimeUnitIsNegative"));
                 }
             }
         }
@@ -504,7 +511,7 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.OnceDateTime < schedulerConfiguration.CurrentDate)
             {
-                throw new TimeSchedulerException(Global.OnceDateTimeLessThanCurrentDate);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("OnceDateTimeLessThanCurrentDate"));
             }
         }
 
@@ -570,7 +577,7 @@ namespace TimeScheduler
                 schedulerConfiguration.SaturdayEnabled == false &&
                 schedulerConfiguration.SundayEnabled == false)
             {
-                throw new TimeSchedulerException(Global.NoWeekDaysSelected);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("NoWeekDaysSelected"));
             }
         }
 
@@ -578,7 +585,7 @@ namespace TimeScheduler
         {
             if (schedulerConfiguration.Enabled == false)
             {
-                throw new TimeSchedulerException(Global.EnabledIsFalse);
+                throw new TimeSchedulerException(SchedulerResourceManager.GetResource("EnabledIsFalse"));
             }
         }
         #endregion private methods

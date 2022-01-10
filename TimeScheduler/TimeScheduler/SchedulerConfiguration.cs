@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Globalization;
 
 namespace TimeScheduler
 {
     public class SchedulerConfiguration
     {
         public SchedulerConfiguration() { }
+
+        public CultureInfo CultureInfo { get; set; }
 
         #region GeneralConfiguration
         public DateTime CurrentDate { get; set; }

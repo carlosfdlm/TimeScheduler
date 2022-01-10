@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using TimeScheduler.Resources;
 
@@ -10,11 +11,11 @@ namespace TimeScheduler
         public static string GetOnceDescription(SchedulerConfiguration schedulerConfiguration)
         {
             return string.Format(
-                Global.OnceDescription,
-                schedulerConfiguration.OnceDateTime.ToShortDateString(),
-                schedulerConfiguration.OnceDateTime.ToShortTimeString(),
-                schedulerConfiguration.StartDate.ToShortDateString(),
-                schedulerConfiguration.EndDate.ToShortDateString());
+                SchedulerResourceManager.GetResource("OnceDescription"),
+                schedulerConfiguration.OnceDateTime.ToString(FormatDate(schedulerConfiguration)),
+                schedulerConfiguration.OnceDateTime.ToString(FormatTime(schedulerConfiguration)),
+                schedulerConfiguration.StartDate.ToString(FormatDate(schedulerConfiguration)),
+                schedulerConfiguration.EndDate.ToString(FormatDate(schedulerConfiguration)));
         }
 
         public static string GetRecurringDescription(SchedulerConfiguration schedulerConfiguration)
@@ -30,49 +31,53 @@ namespace TimeScheduler
 
         private static string MonthlyDescription(SchedulerConfiguration schedulerConfiguration)
         {
-            return string.Format(Global.MonthlyDescription,
+            return string.Format(
+                    SchedulerResourceManager.GetResource("MonthlyDescription"),
                     MonthlyConfiguration(schedulerConfiguration),
                     schedulerConfiguration.EveryMonth,
                     FrequencyStr(schedulerConfiguration),
-                    schedulerConfiguration.StartTime.ToString(),
-                    schedulerConfiguration.EndTime.ToString(),
-                    schedulerConfiguration.StartDate.ToShortDateString(),
-                    schedulerConfiguration.EndDate.ToShortDateString());
+                    DateTime.Now.ChangeTime(schedulerConfiguration.StartTime).ToString(FormatTime(schedulerConfiguration)),
+                    DateTime.Now.ChangeTime(schedulerConfiguration.EndTime).ToString(FormatTime(schedulerConfiguration)),
+                    schedulerConfiguration.StartDate.ToString(FormatDate(schedulerConfiguration)),
+                    schedulerConfiguration.EndDate.ToString(FormatDate(schedulerConfiguration)));
         }
 
         private static string MonthlyConfiguration(SchedulerConfiguration schedulerConfiguration)
         {
-            return schedulerConfiguration.OrdinalConfiguration.ToString() + " " + schedulerConfiguration.DayOfWeek.ToString();
+            return SchedulerResourceManager.GetResource(schedulerConfiguration.OrdinalConfiguration.ToString()) 
+                + " " + SchedulerResourceManager.GetResource(schedulerConfiguration.DayOfWeek.ToString());
         }
 
         private static string WeeklyDescription(SchedulerConfiguration schedulerConfiguration)
         {
-            return string.Format(Global.WeeklyDescription,
+            return string.Format(
+                SchedulerResourceManager.GetResource("WeeklyDescription"),
                 schedulerConfiguration.WeekFrequency,
                 WeekDaysMsg(schedulerConfiguration),
                 FrequencyStr(schedulerConfiguration),
-                schedulerConfiguration.StartTime.ToString(),
-                schedulerConfiguration.EndTime.ToString(),
-                schedulerConfiguration.StartDate.ToShortDateString(),
-                schedulerConfiguration.EndDate.ToShortDateString());
+                DateTime.Now.ChangeTime(schedulerConfiguration.StartTime).ToString(FormatTime(schedulerConfiguration)),
+                DateTime.Now.ChangeTime(schedulerConfiguration.EndTime).ToString(FormatTime(schedulerConfiguration)),
+                schedulerConfiguration.StartDate.ToString(FormatDate(schedulerConfiguration)),
+                schedulerConfiguration.EndDate.ToString(FormatDate(schedulerConfiguration)));
         }
 
         private static string DailyDescription(SchedulerConfiguration schedulerConfiguration)
         {
             return string.Format(
-                Global.DailyDescription,
-                schedulerConfiguration.StartDate.ToShortDateString(),
-                schedulerConfiguration.StartTime.ToString(),
+                SchedulerResourceManager.GetResource("DailyDescription"),
+                schedulerConfiguration.StartDate.ToString(FormatDate(schedulerConfiguration)),
+                DateTime.Now.ChangeTime(schedulerConfiguration.StartTime).ToString(FormatTime(schedulerConfiguration)),
                 FrequencyStr(schedulerConfiguration),
-                schedulerConfiguration.StartTime.ToString(),
-                schedulerConfiguration.EndTime.ToString(),
-                schedulerConfiguration.StartDate.ToShortDateString(),
-                schedulerConfiguration.EndDate.ToShortDateString());
+                DateTime.Now.ChangeTime(schedulerConfiguration.StartTime).ToString(FormatTime(schedulerConfiguration)),
+                DateTime.Now.ChangeTime(schedulerConfiguration.EndTime).ToString(FormatTime(schedulerConfiguration)),
+                schedulerConfiguration.StartDate.ToString(FormatDate(schedulerConfiguration)),
+                schedulerConfiguration.EndDate.ToString(FormatDate(schedulerConfiguration)));
         }
 
         private static object FrequencyStr(SchedulerConfiguration schedulerConfiguration)
         {
-            return schedulerConfiguration.TimeUnitFrequency + " " + schedulerConfiguration.TimeUnit.ToString();
+            return schedulerConfiguration.TimeUnitFrequency + " " +
+                SchedulerResourceManager.GetResource(schedulerConfiguration.TimeUnit.ToString());
         }
 
         public static string WeekDaysMsg(SchedulerConfiguration schedulerConfiguration)
@@ -80,31 +85,31 @@ namespace TimeScheduler
             List<string> weekDaysStr = new();
             if (schedulerConfiguration.MondayEnabled)
             {
-                weekDaysStr.Add("monday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Monday"));
             }
             if (schedulerConfiguration.TuesdayEnabled)
             {
-                weekDaysStr.Add("tuesday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Tuesday"));
             }
             if (schedulerConfiguration.WednesdayEnabled)
             {
-                weekDaysStr.Add("wednesday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Wednesday"));
             }
             if (schedulerConfiguration.ThursdayEnabled)
             {
-                weekDaysStr.Add("thursday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Thursday"));
             }
             if (schedulerConfiguration.FridayEnabled)
             {
-                weekDaysStr.Add("friday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Friday"));
             }
             if (schedulerConfiguration.SaturdayEnabled)
             {
-                weekDaysStr.Add("saturday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Saturday"));
             }
             if (schedulerConfiguration.SundayEnabled)
             {
-                weekDaysStr.Add("sunday");
+                weekDaysStr.Add(SchedulerResourceManager.GetResource("Sunday"));
             }
             StringBuilder weekDaysMsg = new();
             for (int i = 0; i < weekDaysStr.Count; i++)
@@ -112,7 +117,7 @@ namespace TimeScheduler
                 weekDaysMsg.Append(weekDaysStr[i]);
                 if (i + 1 == weekDaysStr.Count - 1)
                 {
-                    weekDaysMsg.Append(" and ");
+                    weekDaysMsg.Append(SchedulerResourceManager.GetResource("And"));
                 }
                 if (i + 1 <= weekDaysStr.Count - 2)
                 {
@@ -120,6 +125,16 @@ namespace TimeScheduler
                 }
             }
             return weekDaysMsg.ToString();
+        }
+
+        private static string FormatDate(SchedulerConfiguration schedulerConfiguration)
+        {
+            return schedulerConfiguration.CultureInfo.DateTimeFormat.ShortDatePattern;
+        }
+
+        private static string FormatTime(SchedulerConfiguration schedulerConfiguration)
+        {
+            return schedulerConfiguration.CultureInfo.DateTimeFormat.ShortTimePattern;
         }
     }
 }

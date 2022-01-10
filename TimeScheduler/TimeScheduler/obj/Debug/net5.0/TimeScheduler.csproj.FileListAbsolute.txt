@@ -17,7 +17,6 @@ C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\De
 C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.pdb
 C:\Users\carlo\Desktop\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.genruntimeconfig.cache
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.csproj.AssemblyReference.cache
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.csproj.GenerateResource.cache
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.AssemblyInfoInputs.cache
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.AssemblyInfo.cs
@@ -33,4 +32,3 @@ C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeSche
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\bin\Debug\net5.0\ref\TimeScheduler.dll
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\bin\Debug\net5.0\TimeScheduler.pdb
 C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.genruntimeconfig.cache
-C:\Users\carlo\OneDrive\Escritorio\Semicrol\TimeScheduler\TimeScheduler\TimeScheduler\obj\Debug\net5.0\TimeScheduler.Resources.Global.resources
